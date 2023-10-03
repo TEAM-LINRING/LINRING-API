@@ -25,15 +25,21 @@ class UserRegisterSerializer(serializers.Serializer):
         return username
 
     def validate_email(self, email):
+        domain = email.split("@")[1]
         email = get_adapter().clean_email(email)
         if allauth_account_settings.UNIQUE_EMAIL:
             if email and email_address_exists(email):
                 raise serializers.ValidationError(
                     'A user is already registered with this e-mail address.',
                 )
+            if "kookmin.ac.kr" != domain:
+                raise serializers.ValidationError(
+                    'This domain is invalid.',
+                )
         return email
 
     def validate_password1(self, password):
+        print(password)
         return get_adapter().clean_password(password)
 
     def validate(self, data):
