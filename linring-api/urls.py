@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/', include([
         path('accounts/', include('accounts.urls')),
         path('chat/', include('chat.urls')),
+        path('report/', include('report.urls')),
         path('health-check/', lambda request: JsonResponse({})),
         path('fcm/', include(router.urls))
     ])),
