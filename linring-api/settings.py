@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'accounts.apps.AccountsConfig',
     'chat.apps.ChatConfig', # 채팅 앱
+    'report.apps.ReportConfig',
     'corsheaders',
     "fcm_django"
 ]
