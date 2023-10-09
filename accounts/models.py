@@ -109,13 +109,13 @@ SIGNIFICANT_CHOICES = (
 
 
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
-    name = models.CharField(max_length=128, verbose_name="이름", null=True)
+    username = models.CharField(max_length=128, verbose_name="이름", null=True)
     email = models.EmailField(unique=True, verbose_name="이메일")
     password = models.CharField(max_length=256, verbose_name="패스워드")
-    nickname = models.CharField(max_length=6, verbose_name="닉네임", null=True)
+    nickname = models.CharField(max_length=6, verbose_name="닉네임", null=True, blank=True, unique=True)
     profile = models.ImageField(verbose_name="프로필 이미지", null=True, blank=True)
     department = models.CharField(max_length=20, verbose_name="학과", choices=DEPARTMENT_CHOICES, null=True)
-    student_number = models.BinaryField(max_length=10, null=True)
+    student_number = models.IntegerField(null=True)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES, null=True)
     significant = models.CharField(max_length=10, verbose_name="특이사항", choices=SIGNIFICANT_CHOICES, null=True,
                                    blank=True)

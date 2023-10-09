@@ -25,6 +25,7 @@ from accounts.views import UserDetailsViewOverride, PasswordChangeView, UserView
 
 router = routers.DefaultRouter()
 router.register(r'tagset', TagSetViewSet)
+router.register(r'user', UserViewSet)
 urlpatterns = [
     path('token/refresh/', get_refresh_view().as_view()),
 
@@ -38,7 +39,6 @@ urlpatterns = [
     path('v2/', include([
         path('', include(router.urls)),
         path('user/me/', UserDetailsViewOverride.as_view(), name='rest_user_details'),
-        path('user/', UserViewSet.as_view({'get': 'list'})),
         path('user/detail/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'})),
         path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
         path('logout/', UserLogoutViewOverride.as_view(), name='rest_logout')

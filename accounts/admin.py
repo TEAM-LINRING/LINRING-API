@@ -7,11 +7,16 @@ from accounts.models import User, TagSet
 
 
 # Register your models here.
+class TagSetInline(admin.TabularInline):
+    model = TagSet
+
+
 @admin.register(User)
 class UserAdmin(ModelAdmin):
     base_model = User
     list_display = [field.name for field in User._meta.fields]
     search_fields = ["email"]
+    inlines = [TagSetInline]
 
     def get_queryset(self, request):
         qs = super(UserAdmin, self).get_queryset(request)

@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from fcm_django.models import FCMDevice
 from rest_framework import status, filters
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -15,7 +16,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from accounts.models import User, TagSet
-from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer
+from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -42,15 +43,6 @@ class PasswordChangeView(GenericAPIView):
     throttle_scope = 'dj_rest_auth'
     authentication_classes = [JWTAuthentication]
 
-    @sensitive_post_parameters_m
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'detail': 'New password has been saved.'})
 
 
 class UserFilter(django_filters.FilterSet):
@@ -65,7 +57,7 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     # filterset_class = UserFilter
     filterset_fields = ['tagset_user__place', 'tagset_user__person', 'tagset_user__method']
@@ -73,15 +65,19 @@ class UserViewSet(ModelViewSet):
     ordering = ('-last_login',)
     pagination_class = StandardResultsSetPagination
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_serializer_class(self):
+        if self.action in ['validationNickName']:
+            return NickNameSerializer
+    # @action(['post'], detail=False, url_path="validation/nickname")
+    # def validationNickName(self, request, *args, **kwargs):
+    #     print("validationName")
+    #     # return super().list(request, *args, **kwargs)
+    #     #TODO : 적극적인 시리얼라이저 활용
+    #     nickname = NickNameSerializer(request.data)
+    #     nickname.is_valid(True)
+    #
+    # def validationEmail(self, request, *args, **kwargs):
+    #     print("validationEmail")
 
 
 def get_refresh_view():
