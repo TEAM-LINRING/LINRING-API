@@ -9,6 +9,8 @@ class Room(TimeStampedModel):
     relation2 = models.ForeignKey(get_user_model(), on_delete=models.DO_NOTHING, verbose_name="관계자2",
                                   related_name="relate2")
 
+    tagset = models.ForeignKey("accounts.TagSet", on_delete=models.DO_NOTHING, verbose_name="태그셋1", related_name="room_tagset")
+    tagset2 = models.ForeignKey("accounts.TagSet", on_delete=models.DO_NOTHING, verbose_name="태그셋2", related_name="room_tagset2")
     class Meta:
         verbose_name_plural = "채팅방 관리"
         verbose_name = "채팅방 관리"
