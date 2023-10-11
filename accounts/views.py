@@ -57,7 +57,7 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     # filterset_class = UserFilter
     filterset_fields = ['tagset_user__place', 'tagset_user__person', 'tagset_user__method']
@@ -104,7 +104,7 @@ class TagSetViewSet(ModelViewSet):
     queryset = TagSet.objects.all()
     serializer_class = TagSetSerializer
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     def get_queryset(self):
