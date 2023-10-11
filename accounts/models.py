@@ -109,13 +109,13 @@ SIGNIFICANT_CHOICES = (
 
 
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
-    name = models.CharField(max_length=128, verbose_name="이름", null=True)
+    username = models.CharField(max_length=128, verbose_name="이름", null=True)
     email = models.EmailField(unique=True, verbose_name="이메일")
     password = models.CharField(max_length=256, verbose_name="패스워드")
-    nickname = models.CharField(max_length=6, verbose_name="닉네임", null=True)
+    nickname = models.CharField(max_length=6, verbose_name="닉네임", null=True, blank=True, unique=True)
     profile = models.ImageField(verbose_name="프로필 이미지", null=True, blank=True)
     department = models.CharField(max_length=20, verbose_name="학과", choices=DEPARTMENT_CHOICES, null=True)
-    student_number = models.BinaryField(max_length=10, null=True)
+    student_number = models.IntegerField(null=True)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES, null=True)
     significant = models.CharField(max_length=10, verbose_name="특이사항", choices=SIGNIFICANT_CHOICES, null=True,
                                    blank=True)
@@ -138,40 +138,40 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
 PLACE_CHOICES = (
     ('북악관', '북악관'),
-    ('예술대', '예술대'),
-    ('미래관', '미래관'),
+    ('예술관', '예술관'),
+    ('복지관', '복지관'),
     ('공학관', '공학관'),
-    ('경상관', '경상관'),
-    ('본부관', '본부관'),
-    ('용두리', '용두리'),
+    ('법학관', '법학관'),
+    ('대운동장', '대운동장'),
     ('도서관', '도서관'),
-    ('복지관 열람실', '복지관 열람실'),
-    ('자율주행스튜디오', '자율주행스튜디오'),
-    ('어디서든', '어디서든'),
+    ('교내 생활관', '교내 생활관'),
+    ('웰니스', '웰니스'),
+    ('빵집', '빵집'),
+    ('교내 카페', '교내 카페'),
+    ('학생식당', '학생식당'),
+    ('아무데나', '아무데나'),
 )
 
 PERSON_CHOICES = (
-    ('유학생', '유학생'),
-    ('타과생', '타과생'),
-    ('선배', '선배'),
+    ('선배','선배'),
     ('후배', '후배'),
-    ('23학번', '23학번'),
-    ('22학번', '22학번'),
-    ('새내기', '새내기'),
-    ('아무랑', '아무랑'),
     ('동기', '동기'),
 )
 
 METHOD_CHOICES = (
-    ('스터디', '스터디'),
-    ('모각코', '모각코'),
+    ('공부', '공부'),
     ('식사', '식사'),
     ('수다', '수다'),
+    ('카페', '카페'),
+    ('산책', '산책'),
+    ('운동', '운동'),
+    ('친구', '친구'),
 )
 
 
 class TagSet(TimeStampedModel):
     place = models.CharField(max_length=12, verbose_name="장소", choices=PLACE_CHOICES)
+    isSameDepartment = models.BooleanField(default=True, verbose_name="과 동일")
     person = models.CharField(max_length=12, verbose_name="대상", choices=PERSON_CHOICES)
     method = models.CharField(max_length=12, verbose_name="행동", choices=METHOD_CHOICES)
 
