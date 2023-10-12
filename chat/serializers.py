@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -11,8 +12,19 @@ class RoomWritableSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
+        print(data['relation'])
         if data['relation'] == data['relation2']:
             raise ValidationError('같은 사용자로 채팅을 열 수 없습니다.')
+
+        if len(self.Meta.model.objects.filter(Q(relation=data["relation"],
+                                                tagset=data["tagset"],
+                                                relation2=data["relation2"],
+                                                tagset2=data["tagset2"])
+                                              | Q(relation2=data["relation"],
+                                                  tagset2=data["tagset"],
+                                                  relation=data["relation2"],
+                                                  tagset=data["tagset2"]))) > 0:
+            raise ValidationError('같은 사용자와 태그로 채팅을 열 수 없습니다.')
         return super().validate(data)
 
 
