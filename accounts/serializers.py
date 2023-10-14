@@ -172,13 +172,13 @@ class UserSerializer(serializers.ModelSerializer):
 class NickNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = 'nickname'
+        fields = ('nickname',)
 
 
 class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = 'email'
+        fields = ('email',)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
