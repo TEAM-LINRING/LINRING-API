@@ -99,7 +99,6 @@ class UserViewSet(ModelViewSet):
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
 
-인
 def get_refresh_view():
     """ Returns a Token Refresh CBV without a circular import """
     from rest_framework_simplejwt.settings import api_settings as jwt_settings
