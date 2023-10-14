@@ -16,7 +16,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from accounts.models import User, TagSet
-from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer
+from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
+    EmailSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -44,7 +45,6 @@ class PasswordChangeView(GenericAPIView):
     authentication_classes = [JWTAuthentication]
 
 
-
 class UserFilter(django_filters.FilterSet):
     class Meta:
         model = User
@@ -65,19 +65,28 @@ class UserViewSet(ModelViewSet):
     ordering = ('-last_login',)
     pagination_class = StandardResultsSetPagination
 
+    @action(['post'], detail=False, url_path="validation/email")
     def get_serializer_class(self):
         if self.action in ['validationNickName']:
             return NickNameSerializer
+
+        @action(detail=False, url_path="validation/nickname", methods=['post'])
+        def validationNickName(self, request, *args, **kwargs):
+            # Check if a user with the given nickname already exists
+            nickname = request.data.get('nickname', '')
+            if User.objects.filter(nickname=nickname).exists():
+                # If the nickname already exists, return an error response
+                response_data = {"message": "Nickname is already in use"}
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # If the nickname is available, return a success response
+                response_data = {"message": "Nickname is available"}
+                return Response(response_data, status=status.HTTP_200_OK)
+
     # @action(['post'], detail=False, url_path="validation/nickname")
     # def validationNickName(self, request, *args, **kwargs):
-    #     print("validationName")
-    #     # return super().list(request, *args, **kwargs)
-    #     #TODO : 적극적인 시리얼라이저 활용
     #     nickname = NickNameSerializer(request.data)
-    #     nickname.is_valid(True)
-    #
-    # def validationEmail(self, request, *args, **kwargs):
-    #     print("validationEmail")
+    #     return nickname
 
 
 def get_refresh_view():
@@ -104,7 +113,7 @@ class TagSetViewSet(ModelViewSet):
     queryset = TagSet.objects.all()
     serializer_class = TagSetSerializer
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     def get_queryset(self):

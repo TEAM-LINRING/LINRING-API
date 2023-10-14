@@ -99,6 +99,7 @@ class UserRegisterSerializer(serializers.Serializer):
     password2 = serializers.CharField(write_only=True)
     nickname = serializers.CharField(max_length=6)
     department = serializers.CharField(max_length=20)
+    gender = serializers.CharField(max_length=10)
     student_number = serializers.IntegerField()
     grade = serializers.CharField(max_length=10)
     significant = serializers.CharField(max_length=10)
@@ -178,6 +179,12 @@ class NickNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = 'nickname'
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = 'email'
 
 
 class ResetPasswordSerializer(serializers.Serializer):
