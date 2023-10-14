@@ -41,6 +41,8 @@ urlpatterns = [
         path('user/me/', UserDetailsViewOverride.as_view(), name='rest_user_details'),
         path('user/detail/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'})),
         path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
-        path('logout/', UserLogoutViewOverride.as_view(), name='rest_logout')
+        path('logout/', UserLogoutViewOverride.as_view(), name='rest_logout'),
+
+
     ]))
 ]
