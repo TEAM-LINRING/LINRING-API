@@ -1,4 +1,5 @@
 import django_filters
+from rest_framework import permissions
 from dj_rest_auth.app_settings import api_settings
 from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
 from dj_rest_auth.views import UserDetailsView, sensitive_post_parameters_m, LogoutView
@@ -17,7 +18,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 
 from accounts.models import User, TagSet
-from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer
+from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
+    EmailSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -45,7 +47,6 @@ class PasswordChangeView(GenericAPIView):
     authentication_classes = [JWTAuthentication]
 
 
-
 class UserFilter(django_filters.FilterSet):
     class Meta:
         model = User
@@ -68,18 +69,36 @@ class UserViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['validationNickName']:
+            print("nickname")
             return NickNameSerializer
-    # @action(['post'], detail=False, url_path="validation/nickname")
-    # def validationNickName(self, request, *args, **kwargs):
-    #     print("validationName")
-    #     # return super().list(request, *args, **kwargs)
-    #     #TODO : 적극적인 시리얼라이저 활용
-    #     nickname = NickNameSerializer(request.data)
-    #     nickname.is_valid(True)
-    #
-    # def validationEmail(self, request, *args, **kwargs):
-    #     print("validationEmail")
+        if self.action in ['validationEmail']:
+            return EmailSerializer
 
+    @action(detail=False, url_path="validation/nickname", methods=['post'],permission_classes=[permissions.AllowAny])
+    def validationNickName(self, request, *args, **kwargs):
+        # Check if a user with the given nickname already exists
+        nickname = request.data.get('nickname', '')
+        if User.objects.filter(nickname=nickname).exists():
+            # If the nickname already exists, return an error response
+            response_data = {"message": "Nickname is already in use"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # If the nickname is available, return a success response
+            response_data = {"message": "Nickname is available"}
+            return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=False, url_path="validation/email", methods=['post'],permission_classes=[permissions.AllowAny])
+    def validationEmail(self, request, *args, **kwargs):
+        # Check if a user with the given nickname already exists
+        email = request.data.get('email', '')
+        if User.objects.filter(email=email).exists():
+            # If the nickname already exists, return an error response
+            response_data = {"message": "email is already in use"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # If the nickname is available, return a success response
+            response_data = {"message": "email is available"}
+            return Response(response_data, status=status.HTTP_200_OK)
 
 def get_refresh_view():
     """ Returns a Token Refresh CBV without a circular import """
@@ -105,7 +124,7 @@ class TagSetViewSet(ModelViewSet):
     queryset = TagSet.objects.all()
     serializer_class = TagSetSerializer
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     def get_queryset(self):
