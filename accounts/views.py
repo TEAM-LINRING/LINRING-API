@@ -112,25 +112,41 @@ class TagSetViewSet(ModelViewSet):
         queryset = TagSet.objects.filter(owner=self.request.user)
         return queryset
 
-# 태그 ID를 넣으면
 class UserSearch(APIView):
-    tags = TagSet.objects.filter(is_active=True)
+
+    def __init__(self):
+        self.tags = None
+        self.tags_score = dict()
+
     def get(self, request, id):
         user = request.user
-        # user_tag = TagSet.objects.filter(id=id, is_active=True)[0]  # 태그를 리스트 형태로 받아옴.
-        user_tag = user.tagset_user.exclude(id=id, is_active=True)[0]  # 태그를 리스트 형태로 받아옴.
+        user_tag = user.tagset_user.filter(id=id, is_active=True)[0]
+        self.tags = TagSet.objects.exclude(owner=user.id)
+        for tag in self.tags:
+            self.tags_score[tag.id] = 0
         place = user_tag.place
-        person = user_tag.person
+        person = user_tag.person    # 선배, 후배, 동기
         method = user_tag.method
-        self.tags = self.fisrtFiltering(place, method)  # 1차 필터링
-        self.secondFiltering(person, user)
+        self.fisrtTagCheck(place, method)
+        print(self.tags_score)
+        self.secondTagCheck(person, user)
         serializer = TagSetSerializer(self.tags, many=True)
         return Response(serializer.data)
-    def fisrtFiltering(self, place, method):
-        return self.tags.exclude(place=place, method=method)
 
-    def secondFiltering(self, person, user):
-        if "학번" in person:          # 학번 모델 나오면 해야할 듯.
+    def fisrtTagCheck(self, place, method):
+        equal_place_tags = self.tags.filter(place=place)
+        equal_method_tags = self.tags.filter(method=method)
+
+        for i in equal_method_tags:
+            self.tags_score[i.id] += 1
+
+        for i in equal_place_tags:
+            self.tags_score[i.id] += 1
+
+    # 같은 과, 다른 과 + 선배, 동기, 후배, 아무나
+    def secondTagCheck(self, person, user):
+
+        if "학번" in person:
             for tag in self.tags:
                 other_user = tag.owner
             pass
