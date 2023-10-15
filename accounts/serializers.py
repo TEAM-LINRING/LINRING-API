@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken
-
+from accounts.models import User
 from accounts.models import TagSet
 
 DEPARTMENT_CHOICES = (
@@ -93,20 +93,16 @@ SIGNIFICANT_CHOICES = (
 
 
 class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=128)
+    name = serializers.CharField(max_length=128, required=True)
     email = serializers.EmailField(required=allauth_account_settings.EMAIL_REQUIRED)
-    password1 = serializers.CharField(max_length=256, write_only=True)
-    password2 = serializers.CharField(write_only=True)
-    nickname = serializers.CharField(max_length=6)
-    department = serializers.CharField(max_length=20)
-    gender = serializers.CharField(max_length=10)
-    student_number = serializers.IntegerField()
-    grade = serializers.CharField(max_length=10)
-    significant = serializers.CharField(max_length=10)
-
-    def validate_username(self, username):
-        username = get_adapter().clean_username(username)
-        return username
+    password1 = serializers.CharField(max_length=256, write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+    nickname = serializers.CharField(max_length=6, required=True)
+    department = serializers.CharField(max_length=20, required=True)
+    gender = serializers.CharField(max_length=10, required=True)
+    student_number = serializers.IntegerField(required=True)
+    grade = serializers.CharField(max_length=10, required=True)
+    significant = serializers.JSONField(required=False)
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
@@ -119,6 +115,13 @@ class UserRegisterSerializer(serializers.Serializer):
 
     def validate_password1(self, password):
         return get_adapter().clean_password(password)
+
+    def validate_nickname(self, nickname):
+        if User.objects.filter(nickname=nickname).exists():
+            raise serializers.ValidationError(
+                'A user is already registered with this nickname.',
+            )
+        return nickname
 
     def validate(self, data):
         if data['password1'] != data['password2']:
@@ -134,6 +137,7 @@ class UserRegisterSerializer(serializers.Serializer):
             'first_name': self.validated_data.get('first_name', ''),
             'last_name': self.validated_data.get('last_name', ''),
             'name': self.validated_data.get('name', ''),
+            'nickname': self.validated_data.get('nickname', ''),
         }
 
     def save(self, request):
@@ -144,6 +148,7 @@ class UserRegisterSerializer(serializers.Serializer):
         user.birthday = self.cleaned_data['birthday']
         user.number = self.cleaned_data['number']
         user.name = self.cleaned_data['name']
+        user.nickname = self.cleaned_data['nickname']
         if "password1" in self.cleaned_data:
             try:
                 adapter.clean_password(self.cleaned_data['password1'], user=user)
