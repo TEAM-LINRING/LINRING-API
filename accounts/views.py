@@ -139,16 +139,16 @@ class UserSearch(APIView):
 
     def get(self, request, id):
         user = request.user
-        user_tag = user.tagset_user.filter(id=id, is_active=True)[0]
+        user_tag = user.tagset_user.get(id=id)
         self.tags = TagSet.objects.exclude(owner=user.id)
         for tag in self.tags:
             self.tags_score[tag.id] = 0
         place = user_tag.place
-        person = user_tag.person    # 선배, 후배, 동기
         method = user_tag.method
         self.fisrtTagCheck(place, method)
         print(self.tags_score)
-        self.secondTagCheck(person, user)
+        self.secondTagCheck(user_tag)
+        print(self.tags_score)
         serializer = TagSetSerializer(self.tags, many=True)
         return Response(serializer.data)
 
@@ -163,15 +163,48 @@ class UserSearch(APIView):
             self.tags_score[i.id] += 1
 
     # 같은 과, 다른 과 + 선배, 동기, 후배, 아무나
-    def secondTagCheck(self, person, user):
+    # 나만 맞으면 1점, 상대도 같이 맞으면 1점 총 2점
+    def secondTagCheck(self, user_tag):
+        is_same_department = user_tag.isSameDepartment
+        for other_tag in self.tags:
+            is_same_other_department = other_tag.isSameDepartment
+            self.tagCheck(user_tag, other_tag, is_same_department, True)
+            self.tagCheck(other_tag, user_tag, is_same_other_department, False)
 
-        if "학번" in person:
-            for tag in self.tags:
-                other_user = tag.owner
+    def tagCheck(self, user_tag, other_user_tag, is_same_department, is_check):
+        user_person = user_tag.person
+        user = User.objects.get(id=user_tag.owner_id)
+        user_student_number = user.student_number
+        user_department = user.department
+
+        other_user = User.objects.get(id=other_user_tag.owner_id)
+        other_user_department = other_user.department
+        other_user_student_number = User.objects.get(id=other_user_tag.owner_id).student_number
+
+        if is_same_department and user_department == other_user_department:
             pass
-        elif person == "선배" or person == "후배" or person == "동기":
-            print("2")
-        elif "과" in person:
-            print("3")
-        elif person == "아무나":
-            print("4")
+        elif not is_same_department and user_department != other_user_department:
+            pass
+        else:
+            return
+
+        if user_person == "선배":
+            if user_student_number > other_user_student_number and is_check:
+                self.tags_score[other_user_tag.id] += 1
+            elif user_student_number > other_user_student_number and not is_check:
+                self.tags_score[user_tag.id] += 1
+        elif user_person == "동기":
+            if user_student_number == other_user_student_number and is_check:
+                self.tags_score[other_user_tag.id] += 1
+            elif user_student_number == other_user_student_number and not is_check:
+                self.tags_score[user_tag.id] += 1
+        elif user_person == "후배":
+            if user_student_number < other_user_student_number and is_check:
+                self.tags_score[other_user_tag.id] += 1
+            elif user_student_number < other_user_student_number and not is_check:
+                self.tags_score[user_tag.id] += 1
+        else:
+            if is_check:
+                self.tags_score[other_user_tag.id] += 1
+            else:
+                self.tags_score[user_tag.id] += 1
