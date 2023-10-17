@@ -144,7 +144,7 @@ class UserRegisterSerializer(serializers.Serializer):
             'last_name': self.validated_data.get('last_name', ''),
             'name': self.validated_data.get('name', ''),
             'nickname': self.validated_data.get('nickname', ''),
-            'significant': self.validated_data.get('significant',[])
+            'significant': self.validated_data.get('significant', [])
         }
 
     def save(self, request):
@@ -167,7 +167,9 @@ class UserRegisterSerializer(serializers.Serializer):
                 )
         user.save()
         # print(list(map(lambda x: SignificantSerializer(x).data, )))
-        user.significant.set(self.cleaned_data['significant'])
+
+        if 'significant' in self.cleaned_data:
+            user.significant.set(self.cleaned_data['significant'])
         user.save()
         # self.custom_signup(request, user)
         # setup_user_email(request, user, [])
@@ -243,6 +245,7 @@ class TagSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = TagSet
         fields = '__all__'
+
 
 class SignificantSerializer(serializers.ModelSerializer):
     class Meta:
