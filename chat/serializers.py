@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from accounts.serializers import UserDetailSerializer
+from accounts.serializers import UserDetailSerializer, TagSetSerializer
 from .models import Room, Message
 
 
@@ -31,6 +31,8 @@ class RoomWritableSerializer(serializers.ModelSerializer):
 class RoomSerializer(serializers.ModelSerializer):
     relation = UserDetailSerializer(read_only=True)
     relation2 = UserDetailSerializer(read_only=True)
+    tagset = TagSetSerializer(read_only=True)
+    tagset2 = TagSetSerializer(read_only=True)
     notice = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
