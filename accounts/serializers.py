@@ -10,6 +10,7 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken
 from accounts.models import User
 from accounts.models import TagSet
+from accounts.models import Significant
 
 DEPARTMENT_CHOICES = (
     ('한국어문학부', '한국어문학부'),
@@ -230,4 +231,9 @@ class NewCookieTokenRefreshSerializer(UpdateTokenRefreshSerializer):
 class TagSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = TagSet
+        fields = '__all__'
+
+class SignificantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Significant
         fields = '__all__'

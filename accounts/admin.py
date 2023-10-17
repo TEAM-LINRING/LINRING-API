@@ -3,7 +3,7 @@ from django.contrib.admin import ModelAdmin
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt import token_blacklist
 
-from accounts.models import User, TagSet
+from accounts.models import User, TagSet,Significant
 
 
 # Register your models here.
@@ -63,3 +63,9 @@ admin.site.register(token_blacklist.models.OutstandingToken, OutstandingTokenAdm
 class TagSetAdmin(ModelAdmin):
     base_model = TagSet
     list_display = [field.name for field in TagSet._meta.fields]
+
+
+@admin.register(Significant)
+class Significant(ModelAdmin):
+    base_model = Significant
+    list_display = [field.name for field in Significant._meta.fields]

@@ -114,9 +114,14 @@ GENDER_CHOICES = (
 
 
 class Significant(TimeStampedModel):
-    name = models.CharField(max_length=128, choices=SIGNIFICANT_CHOICES)
-    user = models.ForeignKey('User', verbose_name="유저", on_delete=models.DO_NOTHING)
+    name = models.CharField(max_length=128, choices=SIGNIFICANT_CHOICES, unique=True)
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "특이사항"
+        verbose_name = "특이사항"
 
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     name = models.CharField(max_length=128, verbose_name="이름")
@@ -128,7 +133,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     student_number = models.IntegerField(null=True)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES),
     gender = models.CharField(max_length=10, verbose_name="성별", choices=GENDER_CHOICES)
-    # significant = models.ManyToManyField(to=Significant, verbose_name="특이사항")
+    significant = models.ManyToManyField(to=Significant, verbose_name="특이사항", related_name='users')
     rating = models.DecimalField(max_digits=100, default=0, decimal_places=2, verbose_name="평점", null=True, blank=True)
     is_active = models.BooleanField(verbose_name="활성화 여부", default=True)
     is_staff = models.BooleanField(verbose_name="스태프 여부", default=False)
