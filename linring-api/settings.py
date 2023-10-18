@@ -151,7 +151,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-URL_FRONT = "http://localhost:3000" #customize your project url
+# URL_FRONT = "http://localhost:3000" #customize your project url
+URL_FRONT = "http://127.0.0.1:8000" #customize your project url
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False

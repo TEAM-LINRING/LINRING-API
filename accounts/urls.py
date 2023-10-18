@@ -21,7 +21,7 @@ from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 
 from accounts.views import UserDetailsViewOverride, PasswordChangeView, UserViewSet, get_refresh_view, \
-    UserLogoutViewOverride, TagSetViewSet
+    UserLogoutViewOverride, TagSetViewSet, UserSearch
 
 router = routers.DefaultRouter()
 router.register(r'tagset', TagSetViewSet)
@@ -42,7 +42,6 @@ urlpatterns = [
         path('user/detail/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'})),
         path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
         path('logout/', UserLogoutViewOverride.as_view(), name='rest_logout'),
-
-
+        path('user-search/<int:id>', UserSearch.as_view(), name='rest_user_search')
     ]))
 ]

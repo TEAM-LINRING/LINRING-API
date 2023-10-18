@@ -125,7 +125,6 @@ class UserRegisterSerializer(serializers.Serializer):
         return email
 
     def validate_password1(self, password):
-        print(password)
         return get_adapter().clean_password(password)
 
     def validate_nickname(self, nickname):
