@@ -144,14 +144,18 @@ class UserRegisterSerializer(serializers.Serializer):
         return {
             'password1': self.validated_data.get('password1', ''),
             'email': self.validated_data.get('email', ''),
-            'birthday': self.validated_data.get('birthday', None),
-            'number': self.validated_data.get('number', ''),
-            'first_name': self.validated_data.get('first_name', ''),
-            'last_name': self.validated_data.get('last_name', ''),
+            # 'birthday': self.validated_data.get('birthday', None),
+            # 'number': self.validated_data.get('number', ''),
+            # 'first_name': self.validated_data.get('first_name', ''),
+            # 'last_name': self.validated_data.get('last_name', ''),
+            'department': self.validated_data.get('department', ''),
+            'student_number': self.validated_data.get('student_number', ''),
+            'grade': self.validated_data.get('grade', ''),
+            'gender': self.validated_data.get('gender', ''),
             'name': self.validated_data.get('name', ''),
             'nickname': self.validated_data.get('nickname', ''),
             'significant': self.validated_data.get('significant', []),
-            'birth':self.validated_data.get('birth','')
+            'birth': self.validated_data.get('birth', '')
         }
 
     def save(self, request):
@@ -159,10 +163,15 @@ class UserRegisterSerializer(serializers.Serializer):
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         user = adapter.save_user(request, user, self, commit=False)
-        user.birthday = self.cleaned_data['birthday']
-        user.number = self.cleaned_data['number']
+        # user.birthday = self.cleaned_data['birthday']
+        # user.number = self.cleaned_data['number']
         user.name = self.cleaned_data['name']
         user.nickname = self.cleaned_data['nickname']
+        user.department = self.cleaned_data['department']
+        user.student_number = self.cleaned_data['student_number']
+        user.grade = self.cleaned_data['grade']
+        user.gender = self.cleaned_data['gender']
+        user.birth = self.cleaned_data['birth']
 
         print(user)
         if "password1" in self.cleaned_data:
