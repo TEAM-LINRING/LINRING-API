@@ -102,6 +102,7 @@ class UserRegisterSerializer(serializers.Serializer):
     department = serializers.CharField(max_length=20, required=True)
     gender = serializers.CharField(max_length=10, required=True)
     student_number = serializers.IntegerField(required=True)
+    birth = serializers.IntegerField(required=True)
     grade = serializers.CharField(max_length=10, required=True)
     significant = serializers.SlugRelatedField(
         many=True,
@@ -149,7 +150,8 @@ class UserRegisterSerializer(serializers.Serializer):
             'last_name': self.validated_data.get('last_name', ''),
             'name': self.validated_data.get('name', ''),
             'nickname': self.validated_data.get('nickname', ''),
-            'significant': self.validated_data.get('significant', [])
+            'significant': self.validated_data.get('significant', []),
+            'birth':self.validated_data.get('birth','')
         }
 
     def save(self, request):
