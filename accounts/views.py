@@ -135,7 +135,6 @@ class TagSetViewSet(ModelViewSet):
 
 
 class UserSearch(APIView):
-
     def __init__(self):
         self.tags = None
         self.tags_score = dict()
@@ -145,6 +144,12 @@ class UserSearch(APIView):
         user_tag = user.tagset_user.get(id=id)
         users = User.objects.exclude(id=user.id)
         self.tags = TagSet.objects.exclude(owner=user.id)
+
+        # 만약 태그가 4개 미만인 경우 매칭 알고리즘, 추천 알고리즘 미적용 후 리턴
+        if len(self.tags) < 4:
+            seriallizer = TagSetSerializer(self.tags, many=True)
+            return Response(seriallizer.data)
+
         rating_mean = 0
         for u in users:
             rating_mean += u.rating
@@ -155,16 +160,14 @@ class UserSearch(APIView):
         method = user_tag.method
         self.fisrtTagCheck(place, method)
         self.secondTagCheck(user_tag)
-        print(f"user tag : {place}에서 {'같은 과' if user_tag.isSameDepartment else '다른 과'} {user_tag.person}와 {method}하기")
-        for i in range(0, len(self.tags)):
-            print(
-                f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
-
+        # print(f"user tag : {place}에서 {'같은 과' if user_tag.isSameDepartment else '다른 과'} {user_tag.person}와 {method}하기")
+        # for i in range(0, len(self.tags)):
+        #     print(
+        #         f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
         result_tags = self.recommend(rating_mean)
-        for i in range(0, len(self.tags)):
-            print(
-                f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
-        print(result_tags)
+        # for i in range(0, len(self.tags)):
+        #     print(f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
+        # print(result_tags)
         serializer = TagSetSerializer(result_tags, many=True)
         return Response(serializer.data)
 
