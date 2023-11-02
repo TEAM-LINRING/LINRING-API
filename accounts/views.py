@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import Q
 from rest_framework import permissions
 from dj_rest_auth.app_settings import api_settings
 from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
@@ -74,7 +75,7 @@ class UserViewSet(ModelViewSet):
         if self.action in ['validationEmail']:
             return EmailSerializer
 
-    @action(detail=False, url_path="validation/nickname", methods=['post'],permission_classes=[permissions.AllowAny])
+    @action(detail=False, url_path="validation/nickname", methods=['post'], permission_classes=[permissions.AllowAny])
     def validationNickName(self, request, *args, **kwargs):
         # Check if a user with the given nickname already exists
         nickname = request.data.get('nickname', '')
@@ -87,7 +88,7 @@ class UserViewSet(ModelViewSet):
             response_data = {"message": "Nickname is available"}
             return Response(response_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, url_path="validation/email", methods=['post'],permission_classes=[permissions.AllowAny])
+    @action(detail=False, url_path="validation/email", methods=['post'], permission_classes=[permissions.AllowAny])
     def validationEmail(self, request, *args, **kwargs):
         # Check if a user with the given nickname already exists
         email = request.data.get('email', '')
@@ -99,6 +100,7 @@ class UserViewSet(ModelViewSet):
             # If the nickname is available, return a success response
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
+
 
 def get_refresh_view():
     """ Returns a Token Refresh CBV without a circular import """
@@ -131,8 +133,8 @@ class TagSetViewSet(ModelViewSet):
         queryset = TagSet.objects.filter(owner=self.request.user)
         return queryset
 
-class UserSearch(APIView):
 
+class UserSearch(APIView):
     def __init__(self):
         self.tags = None
         self.tags_score = dict()
@@ -140,16 +142,33 @@ class UserSearch(APIView):
     def get(self, request, id):
         user = request.user
         user_tag = user.tagset_user.get(id=id)
+        users = User.objects.exclude(id=user.id)
         self.tags = TagSet.objects.exclude(owner=user.id)
+
+        # 만약 태그가 4개 미만인 경우 매칭 알고리즘, 추천 알고리즘 미적용 후 리턴
+        if len(self.tags) < 4:
+            seriallizer = TagSetSerializer(self.tags, many=True)
+            return Response(seriallizer.data)
+
+        rating_mean = 0
+        for u in users:
+            rating_mean += u.rating
+        rating_mean /= len(users)
         for tag in self.tags:
             self.tags_score[tag.id] = 0
         place = user_tag.place
         method = user_tag.method
         self.fisrtTagCheck(place, method)
-        print(self.tags_score)
         self.secondTagCheck(user_tag)
-        print(self.tags_score)
-        serializer = TagSetSerializer(self.tags, many=True)
+        # print(f"user tag : {place}에서 {'같은 과' if user_tag.isSameDepartment else '다른 과'} {user_tag.person}와 {method}하기")
+        # for i in range(0, len(self.tags)):
+        #     print(
+        #         f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
+        result_tags = self.recommend(rating_mean)
+        # for i in range(0, len(self.tags)):
+        #     print(f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
+        # print(result_tags)
+        serializer = TagSetSerializer(result_tags, many=True)
         return Response(serializer.data)
 
     def fisrtTagCheck(self, place, method):
@@ -208,3 +227,13 @@ class UserSearch(APIView):
                 self.tags_score[other_user_tag.id] += 1
             else:
                 self.tags_score[user_tag.id] += 1
+
+    # n(매칭 알고리즘 결과 점수) + (상대 유저 매너점수 - 유저 매너점수 평균)
+    def recommend(self, rating_mean):
+        for tag in self.tags:
+            self.tags_score[tag.id] += tag.owner.rating - rating_mean
+        result_tag_list = list(dict(sorted(self.tags_score.items(), key=lambda x:x[1], reverse=True)))[:4]
+        result_tag = list()
+        for i in result_tag_list:
+            result_tag.append(TagSet.objects.filter(id=i)[0])
+        return result_tag
