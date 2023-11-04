@@ -18,7 +18,6 @@ from google.auth import load_credentials_from_file
 # Build paths inside the accounts like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -29,7 +28,6 @@ SECRET_KEY = 'u26w5j74+fgytu$e6$bem-u8o)yfc#jw5-i4o5rwfjlm1a$*4f'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -51,7 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'dj_rest_auth.registration',
     'accounts.apps.AccountsConfig',
-    'chat.apps.ChatConfig', # 채팅 앱
+    'chat.apps.ChatConfig',  # 채팅 앱
     'report.apps.ReportConfig',
     'corsheaders',
     "fcm_django"
@@ -68,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'linring-api.urls'  #project setting에 알맞게 수정 필요
+ROOT_URLCONF = 'linring-api.urls'  # project setting에 알맞게 수정 필요
 
 TEMPLATES = [
     {
@@ -90,7 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'linring-api.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -100,7 +97,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -119,7 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -152,7 +147,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL_FRONT = "http://localhost:3000" #customize your project url
-URL_FRONT = "http://127.0.0.1:8000" #customize your project url
+URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False
@@ -168,14 +163,14 @@ ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = URL_FRONT + REGISTER_REDIREC
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = URL_FRONT + REGISTER_REDIRECT_URL
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'                   # 메일 호스트 서버
+EMAIL_HOST = 'smtp.gmail.com'  # 메일 호스트 서버
 EMAIL_PORT = 587
-EMAIL_HOST_USER='teamlinring@gmail.com'
-EMAIL_HOST_PASSWORD='wxszuoftetoqvdyt'
+EMAIL_HOST_USER = 'teamlinring@gmail.com'
+EMAIL_HOST_PASSWORD = 'wxszuoftetoqvdyt'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-SERVER_EMAIL = 'no-aply@email.com' # 커스텀 이메일 주소
+SERVER_EMAIL = 'no-aply@email.com'  # 커스텀 이메일 주소
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[커스텀 메일 prefix] '
@@ -192,8 +187,8 @@ REST_USE_JWT = True
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1000),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1000),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1000),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': False,
     "UPDATE_LAST_LOGIN": True,
@@ -217,7 +212,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-CSRF_TRUSTED_ORIGINS = ["https://api.", "https://", "http://192.168.0.208","http://localhost:3000"] # add custom your url
+CSRF_TRUSTED_ORIGINS = ["https://api.", "https://", "http://192.168.0.208",
+                        "http://localhost:3000"]  # add custom your url
 
 
 # To learn more, visit the docs here:
@@ -240,7 +236,7 @@ FIREBASE_APP = initialize_app()
 # init second firebase app for fcm-django
 # the environment variable contains a path to the custom google service account JSON
 custom_credentials = CustomFirebaseCredentials(
-    os.path.join(BASE_DIR, 'linring-a3e66-firebase-adminsdk-vumb7-53e3e56fc8.json')) #custom url json path
+    os.path.join(BASE_DIR, 'linring-a3e66-firebase-adminsdk-vumb7-53e3e56fc8.json'))  # custom url json path
 FIREBASE_MESSAGING_APP = initialize_app(custom_credentials, name='messaging')
 FCM_DJANGO_SETTINGS = {
     # an instance of firebase_admin.App to be used as default for all fcm-django requests
