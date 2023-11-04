@@ -132,7 +132,6 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     profile = models.ImageField(verbose_name="프로필 이미지", null=True, blank=True)
     department = models.CharField(max_length=20, verbose_name="학과", choices=DEPARTMENT_CHOICES)
     student_number = models.IntegerField(null=True)
-    # grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES, null=True, default='')
     gender = models.CharField(max_length=10, verbose_name="성별", choices=GENDER_CHOICES)
     significant = models.ManyToManyField(to=Significant, verbose_name="특이사항", related_name='users',
