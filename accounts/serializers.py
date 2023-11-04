@@ -3,6 +3,7 @@ from allauth.utils import email_address_exists
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
+from decimal import Decimal
 from allauth.account import app_settings as allauth_account_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -163,8 +164,6 @@ class UserRegisterSerializer(serializers.Serializer):
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         user = adapter.save_user(request, user, self, commit=False)
-        # user.birthday = self.cleaned_data['birthday']
-        # user.number = self.cleaned_data['number']
         user.name = self.cleaned_data['name']
         user.nickname = self.cleaned_data['nickname']
         user.department = self.cleaned_data['department']
@@ -214,6 +213,11 @@ class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ('email',)
+
+
+class RatingUpdateSerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    rating = serializers.DecimalField(max_digits=5, decimal_places=2)
 
 
 class ResetPasswordSerializer(serializers.Serializer):

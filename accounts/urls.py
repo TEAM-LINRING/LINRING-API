@@ -19,6 +19,7 @@ from dj_rest_auth.views import PasswordResetConfirmView
 from django.urls import path, include, re_path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
+from .views import RatingUpdateView
 
 from accounts.views import UserDetailsViewOverride, PasswordChangeView, UserViewSet, get_refresh_view, \
     UserLogoutViewOverride, TagSetViewSet, UserSearch
@@ -28,7 +29,7 @@ router.register(r'tagset', TagSetViewSet)
 router.register(r'user', UserViewSet)
 urlpatterns = [
     path('token/refresh/', get_refresh_view().as_view()),
-
+    path('rating/update/', RatingUpdateView.as_view(), name='update_rating'),
     path('', include('dj_rest_auth.urls')),
     re_path(r'^register/account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
             name='account_confirm_email'),
