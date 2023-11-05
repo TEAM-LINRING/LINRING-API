@@ -143,9 +143,8 @@ class UserSearch(APIView):
         user = request.user
         user_tag = user.tagset_user.get(id=id)
         users = User.objects.exclude(id=user.id)
-        self.tags = TagSet.objects.exclude(owner=user.id)
+        self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False)
 
-        # 만약 태그가 4개 미만인 경우 매칭 알고리즘, 추천 알고리즘 미적용 후 리턴
         if len(self.tags) < 4:
             seriallizer = TagSetSerializer(self.tags, many=True)
             return Response(seriallizer.data)
@@ -160,14 +159,7 @@ class UserSearch(APIView):
         method = user_tag.method
         self.fisrtTagCheck(place, method)
         self.secondTagCheck(user_tag)
-        # print(f"user tag : {place}에서 {'같은 과' if user_tag.isSameDepartment else '다른 과'} {user_tag.person}와 {method}하기")
-        # for i in range(0, len(self.tags)):
-        #     print(
-        #         f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
         result_tags = self.recommend(rating_mean)
-        # for i in range(0, len(self.tags)):
-        #     print(f"tag{i + 1} : {self.tags[i].place}에서 {'같은 과' if self.tags[i].isSameDepartment else '다른 과'} {self.tags[i].person}와 {self.tags[i].method}하기 | tag_score : {self.tags_score[i + 1]}")
-        # print(result_tags)
         serializer = TagSetSerializer(result_tags, many=True)
         return Response(serializer.data)
 
@@ -181,8 +173,6 @@ class UserSearch(APIView):
         for i in equal_place_tags:
             self.tags_score[i.id] += 1
 
-    # 같은 과, 다른 과 + 선배, 동기, 후배, 아무나
-    # 나만 맞으면 1점, 상대도 같이 맞으면 1점 총 2점
     def secondTagCheck(self, user_tag):
         is_same_department = user_tag.isSameDepartment
         for other_tag in self.tags:
@@ -228,7 +218,6 @@ class UserSearch(APIView):
             else:
                 self.tags_score[user_tag.id] += 1
 
-    # n(매칭 알고리즘 결과 점수) + (상대 유저 매너점수 - 유저 매너점수 평균)
     def recommend(self, rating_mean):
         for tag in self.tags:
             self.tags_score[tag.id] += tag.owner.rating - rating_mean
