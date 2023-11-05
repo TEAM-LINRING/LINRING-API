@@ -3,6 +3,7 @@ from allauth.utils import email_address_exists
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
+from decimal import Decimal
 from allauth.account import app_settings as allauth_account_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -11,6 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from accounts.models import User
 from accounts.models import TagSet
 from accounts.models import Significant
+from accounts.models import Profile
 
 DEPARTMENT_CHOICES = (
     ('한국어문학부', '한국어문학부'),
@@ -144,10 +146,6 @@ class UserRegisterSerializer(serializers.Serializer):
         return {
             'password1': self.validated_data.get('password1', ''),
             'email': self.validated_data.get('email', ''),
-            # 'birthday': self.validated_data.get('birthday', None),
-            # 'number': self.validated_data.get('number', ''),
-            # 'first_name': self.validated_data.get('first_name', ''),
-            # 'last_name': self.validated_data.get('last_name', ''),
             'department': self.validated_data.get('department', ''),
             'student_number': self.validated_data.get('student_number', ''),
             'grade': self.validated_data.get('grade', ''),
@@ -163,8 +161,6 @@ class UserRegisterSerializer(serializers.Serializer):
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         user = adapter.save_user(request, user, self, commit=False)
-        # user.birthday = self.cleaned_data['birthday']
-        # user.number = self.cleaned_data['number']
         user.name = self.cleaned_data['name']
         user.nickname = self.cleaned_data['nickname']
         user.department = self.cleaned_data['department']
@@ -173,7 +169,6 @@ class UserRegisterSerializer(serializers.Serializer):
         user.gender = self.cleaned_data['gender']
         user.birth = self.cleaned_data['birth']
 
-        print(user)
         if "password1" in self.cleaned_data:
             try:
                 adapter.clean_password(self.cleaned_data['password1'], user=user)
@@ -182,13 +177,10 @@ class UserRegisterSerializer(serializers.Serializer):
                     detail=serializers.as_serializer_error(exc)
                 )
         user.save()
-        # print(list(map(lambda x: SignificantSerializer(x).data, )))
 
         if 'significant' in self.cleaned_data:
             user.significant.set(self.cleaned_data['significant'])
         user.save()
-        # self.custom_signup(request, user)
-        # setup_user_email(request, user, [])
         return user
 
 
@@ -214,6 +206,11 @@ class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ('email',)
+
+
+class RatingUpdateSerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    rating = serializers.DecimalField(max_digits=5, decimal_places=2)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -266,4 +263,10 @@ class TagSetSerializer(serializers.ModelSerializer):
 class SignificantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Significant
+        fields = '__all__'
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
         fields = '__all__'

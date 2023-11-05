@@ -1,7 +1,9 @@
 import django_filters
 from django.db.models import Q
 from rest_framework import permissions
+from decimal import Decimal, getcontext
 from dj_rest_auth.app_settings import api_settings
+from django.shortcuts import get_object_or_404
 from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
 from dj_rest_auth.views import UserDetailsView, sensitive_post_parameters_m, LogoutView
 from django.contrib.auth import get_user_model
@@ -17,14 +19,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
+from rest_framework import generics, permissions
 
 from accounts.models import User, TagSet
 from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
-    EmailSerializer
+    EmailSerializer, RatingUpdateSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
-# override after then fixed remove
 class UserDetailsViewOverride(UserDetailsView):
     authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
 
@@ -62,18 +64,23 @@ class UserViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class = UserFilter
     filterset_fields = ['tagset_user__place', 'tagset_user__person', 'tagset_user__method']
     ordering_fields = [field.name for field in User._meta.fields]
     ordering = ('-last_login',)
     pagination_class = StandardResultsSetPagination
 
+    def get_queryset(self):
+        queryset = get_user_model().objects
+        return queryset
+
     def get_serializer_class(self):
         if self.action in ['validationNickName']:
-            print("nickname")
             return NickNameSerializer
         if self.action in ['validationEmail']:
             return EmailSerializer
+        if self.action in ['updateRating']:
+            return RatingUpdateSerializer
+        return self.serializer_class
 
     @action(detail=False, url_path="validation/nickname", methods=['post'], permission_classes=[permissions.AllowAny])
     def validationNickName(self, request, *args, **kwargs):
@@ -100,6 +107,31 @@ class UserViewSet(ModelViewSet):
             # If the nickname is available, return a success response
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
+
+
+class RatingUpdateView(generics.UpdateAPIView):
+    serializer_class = RatingUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
+
+    def get_object(self):
+        user_id = self.request.data.get('user', '')
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=user_id)
+        return obj
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        rating = request.data.get('rating', '')
+        user.rating = (Decimal(rating) + Decimal(user.rating)) / 2
+        user.save()
+        response_data = {
+            'user': user.id,
+            'new_rating': user.rating,
+        }
+        return Response(response_data)
 
 
 def get_refresh_view():
@@ -221,7 +253,7 @@ class UserSearch(APIView):
     def recommend(self, rating_mean):
         for tag in self.tags:
             self.tags_score[tag.id] += tag.owner.rating - rating_mean
-        result_tag_list = list(dict(sorted(self.tags_score.items(), key=lambda x:x[1], reverse=True)))[:4]
+        result_tag_list = list(dict(sorted(self.tags_score.items(), key=lambda x: x[1], reverse=True)))[:4]
         result_tag = list()
         for i in result_tag_list:
             result_tag.append(TagSet.objects.filter(id=i)[0])
