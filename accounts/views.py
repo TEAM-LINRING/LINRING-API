@@ -107,7 +107,7 @@ class UserViewSet(ModelViewSet):
 
 class RatingUpdateView(generics.UpdateAPIView):
     serializer_class = RatingUpdateSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return get_user_model().objects.all()
