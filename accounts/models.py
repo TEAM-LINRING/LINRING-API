@@ -124,12 +124,24 @@ class Significant(TimeStampedModel):
         verbose_name = "특이사항"
 
 
+class Profile(TimeStampedModel):
+    name = models.CharField(max_length=128, verbose_name="이름")
+    profile = models.ImageField(verbose_name="프로필 이미지")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "프로필 이미지 프리셋"
+        verbose_name = "프로필 이미지 프리셋"
+
+
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     name = models.CharField(max_length=128, verbose_name="이름")
     email = models.EmailField(unique=True, verbose_name="이메일")
     password = models.CharField(max_length=256, verbose_name="패스워드")
     nickname = models.CharField(max_length=6, verbose_name="닉네임", unique=True)
-    profile = models.ImageField(verbose_name="프로필 이미지", null=True, blank=True)
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='users_profile')
     department = models.CharField(max_length=20, verbose_name="학과", choices=DEPARTMENT_CHOICES)
     student_number = models.IntegerField(null=True)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES, null=True, default='')

@@ -12,6 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from accounts.models import User
 from accounts.models import TagSet
 from accounts.models import Significant
+from accounts.models import Profile
 
 DEPARTMENT_CHOICES = (
     ('한국어문학부', '한국어문학부'),
@@ -145,10 +146,6 @@ class UserRegisterSerializer(serializers.Serializer):
         return {
             'password1': self.validated_data.get('password1', ''),
             'email': self.validated_data.get('email', ''),
-            # 'birthday': self.validated_data.get('birthday', None),
-            # 'number': self.validated_data.get('number', ''),
-            # 'first_name': self.validated_data.get('first_name', ''),
-            # 'last_name': self.validated_data.get('last_name', ''),
             'department': self.validated_data.get('department', ''),
             'student_number': self.validated_data.get('student_number', ''),
             'grade': self.validated_data.get('grade', ''),
@@ -172,7 +169,6 @@ class UserRegisterSerializer(serializers.Serializer):
         user.gender = self.cleaned_data['gender']
         user.birth = self.cleaned_data['birth']
 
-        print(user)
         if "password1" in self.cleaned_data:
             try:
                 adapter.clean_password(self.cleaned_data['password1'], user=user)
@@ -181,13 +177,10 @@ class UserRegisterSerializer(serializers.Serializer):
                     detail=serializers.as_serializer_error(exc)
                 )
         user.save()
-        # print(list(map(lambda x: SignificantSerializer(x).data, )))
 
         if 'significant' in self.cleaned_data:
             user.significant.set(self.cleaned_data['significant'])
         user.save()
-        # self.custom_signup(request, user)
-        # setup_user_email(request, user, [])
         return user
 
 
@@ -270,4 +263,10 @@ class TagSetSerializer(serializers.ModelSerializer):
 class SignificantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Significant
+        fields = '__all__'
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
         fields = '__all__'

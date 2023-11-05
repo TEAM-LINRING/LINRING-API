@@ -69,6 +69,10 @@ class UserViewSet(ModelViewSet):
     ordering = ('-last_login',)
     pagination_class = StandardResultsSetPagination
 
+    def get_queryset(self):
+        queryset = get_user_model().objects
+        return queryset
+
     def get_serializer_class(self):
         if self.action in ['validationNickName']:
             return NickNameSerializer
