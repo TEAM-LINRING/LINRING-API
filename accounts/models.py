@@ -27,6 +27,25 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
+COLLEGE_CHOICES = (
+    ("글로벌인문지역대학", "글로벌인문지역대학"),
+    ("사회과학대학", "사회과학대학"),
+    ("법과대학", "법과대학"),
+    ("경상대학", "경상대학"),
+    ("경영대학", "경영대학"),
+    ("창의공과대학", "창의공과대학"),
+    ("소프트웨어융합대학", "소프트웨어융합대학"),
+    ("자동차융합대학", "자동차융합대학"),
+    ("과학기술대학", "과학기술대학"),
+    ("건축대학", "건축대학"),
+    ("조형대학", "조형대학"),
+    ("예술대학", "예술대학"),
+    ("체육대학", "체육대학"),
+    ("미래모빌리티학과", "미래모빌리티학과"),
+    ("교양대학", "교양대학"),
+    ("인문기술융합학부", "인문기술융합학부")
+)
+
 DEPARTMENT_CHOICES = (
     ('한국어문학부', '한국어문학부'),
     ('영어영문학부', '영어영문학부'),
@@ -141,7 +160,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     email = models.EmailField(unique=True, verbose_name="이메일")
     password = models.CharField(max_length=256, verbose_name="패스워드")
     nickname = models.CharField(max_length=6, verbose_name="닉네임", unique=True)
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='users_profile')
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='users_profile', null=True)
+    college = models.CharField(max_length=20, verbose_name="단과대학", choices=COLLEGE_CHOICES, default='')
     department = models.CharField(max_length=20, verbose_name="학과", choices=DEPARTMENT_CHOICES)
     student_number = models.IntegerField(null=True)
     grade = models.CharField(max_length=10, verbose_name="학년", choices=GRADE_CHOICES, null=True, default='')

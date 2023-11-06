@@ -14,6 +14,25 @@ from accounts.models import TagSet
 from accounts.models import Significant
 from accounts.models import Profile
 
+COLLEGE_CHOICES = (
+    ("글로벌인문지역대학", "글로벌인문지역대학"),
+    ("사회과학대학", "사회과학대학"),
+    ("법과대학", "법과대학"),
+    ("경상대학", "경상대학"),
+    ("경영대학", "경영대학"),
+    ("창의공과대학", "창의공과대학"),
+    ("소프트웨어융합대학", "소프트웨어융합대학"),
+    ("자동차융합대학", "자동차융합대학"),
+    ("과학기술대학", "과학기술대학"),
+    ("건축대학", "건축대학"),
+    ("조형대학", "조형대학"),
+    ("예술대학", "예술대학"),
+    ("체육대학", "체육대학"),
+    ("미래모빌리티학과", "미래모빌리티학과"),
+    ("교양대학", "교양대학"),
+    ("인문기술융합학부", "인문기술융합학부")
+)
+
 DEPARTMENT_CHOICES = (
     ('한국어문학부', '한국어문학부'),
     ('영어영문학부', '영어영문학부'),
@@ -94,6 +113,16 @@ SIGNIFICANT_CHOICES = (
     ("휴학생", "휴학생"),
 )
 
+GENDER_CHOICES = (
+    ("남", "남"),
+    ("여", "여")
+)
+
+
+class ProfileSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=128)
+    profile_image = serializers.ImageField()
+
 
 class UserRegisterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=128, required=True)
@@ -101,11 +130,13 @@ class UserRegisterSerializer(serializers.Serializer):
     password1 = serializers.CharField(max_length=256, write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
     nickname = serializers.CharField(max_length=6, required=True)
-    department = serializers.CharField(max_length=20, required=True)
-    gender = serializers.CharField(max_length=10, required=True)
+    college = serializers.ChoiceField(required=True, choices=COLLEGE_CHOICES)
+    department = serializers.ChoiceField(required=True, choices=DEPARTMENT_CHOICES)
+    profile = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=True)
+    gender = serializers.ChoiceField(required=True, choices=GENDER_CHOICES)
     student_number = serializers.IntegerField(required=True)
     birth = serializers.IntegerField(required=True)
-    grade = serializers.CharField(max_length=10, required=True)
+    grade = serializers.ChoiceField(required=True, choices=GRADE_CHOICES)
     significant = serializers.SlugRelatedField(
         many=True,
         slug_field='name',
@@ -150,6 +181,8 @@ class UserRegisterSerializer(serializers.Serializer):
             'student_number': self.validated_data.get('student_number', ''),
             'grade': self.validated_data.get('grade', ''),
             'gender': self.validated_data.get('gender', ''),
+            'college': self.validated_data.get('college', ''),
+            'profile': self.validated_data.get('profile', ''),
             'name': self.validated_data.get('name', ''),
             'nickname': self.validated_data.get('nickname', ''),
             'significant': self.validated_data.get('significant', []),
@@ -163,6 +196,8 @@ class UserRegisterSerializer(serializers.Serializer):
         user = adapter.save_user(request, user, self, commit=False)
         user.name = self.cleaned_data['name']
         user.nickname = self.cleaned_data['nickname']
+        user.profile = self.cleaned_data['profile']
+        user.college = self.cleaned_data['college']
         user.department = self.cleaned_data['department']
         user.student_number = self.cleaned_data['student_number']
         user.grade = self.cleaned_data['grade']
