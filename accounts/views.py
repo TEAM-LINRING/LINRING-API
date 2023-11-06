@@ -162,8 +162,11 @@ class TagSetViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     def get_queryset(self):
-        queryset = TagSet.objects.filter(owner=self.request.user)
-        return queryset
+        if isinstance(self.request.user, User):
+            queryset = TagSet.objects.filter(owner=self.request.user)
+            return queryset
+        else:
+            return TagSet.objects.none()
 
 
 class UserSearch(APIView):
