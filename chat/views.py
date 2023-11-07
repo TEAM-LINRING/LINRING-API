@@ -63,9 +63,6 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=res_status, headers=headers)
-    
-    # def update(self, request, pk=None):
-    #     print(pk)
 
 def convertValueString(data: dict):
     ret = {}

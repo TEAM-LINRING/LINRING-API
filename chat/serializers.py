@@ -2,10 +2,8 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from accounts.serializers import UserDetailSerializer, TagSetSerializer, TagSetIsActiveSerializer
+from accounts.serializers import UserDetailSerializer, TagSetSerializer
 from .models import Room, Message
-
-from datetime import datetime
 from django.utils import timezone
 
 class RoomWritableSerializer(serializers.ModelSerializer):
@@ -41,6 +39,11 @@ class RoomReservationTimeSerializer(serializers.ModelSerializer):
         if data['reservation_time'] < timezone.localtime():
             raise ValidationError('지금보다 더 전으로 시간을 예약할 수 없습니다.')
 
+        self.set_is_active(data)
+
+        return super().validate(data)
+    
+    def set_is_active(self, data):
         room = self.Meta.model.objects.get(tagset=data["tagset"], tagset2=data["tagset2"])
         tagset = room.tagset
         tagset2 = room.tagset2
@@ -48,8 +51,11 @@ class RoomReservationTimeSerializer(serializers.ModelSerializer):
         tagset2.is_active = False
         tagset.save()
         tagset2.save()
-        
-        return super().validate(data)
+        self.send_create_message(room=room)
+    
+    def send_create_message(self, room):
+        message = Message(room=room, type=2, args=room.reservation_time, receiver=room.relation, sender=room.relation2, is_read=True)
+        message.save()
     
 class RoomSerializer(serializers.ModelSerializer):
     relation = UserDetailSerializer(read_only=True)
@@ -72,8 +78,8 @@ class RoomSerializer(serializers.ModelSerializer):
 class MessageWritableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = '__all__'
-
+        fields = '__all__' 
+        
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserDetailSerializer(read_only=True)
