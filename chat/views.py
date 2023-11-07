@@ -13,7 +13,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from utils.pagination import StandardResultsSetPagination
 from .models import Room, Message
-from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer
+from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer, RoomReservationTimeSerializer
 
 from django.conf import settings
 
@@ -35,6 +35,8 @@ class RoomViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ["create", "update"]:
             return RoomWritableSerializer
+        elif self.action in ["partial_update"]:
+            return RoomReservationTimeSerializer
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
@@ -61,7 +63,6 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=res_status, headers=headers)
-
 
 def convertValueString(data: dict):
     ret = {}

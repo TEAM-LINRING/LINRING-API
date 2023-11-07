@@ -11,6 +11,7 @@ class Room(TimeStampedModel):
 
     tagset = models.ForeignKey("accounts.TagSet", on_delete=models.DO_NOTHING, verbose_name="태그셋1", related_name="room_tagset")
     tagset2 = models.ForeignKey("accounts.TagSet", on_delete=models.DO_NOTHING, verbose_name="태그셋2", related_name="room_tagset2")
+    reservation_time = models.DateTimeField(null=True, verbose_name="만남예약시간", blank=True)
     class Meta:
         verbose_name_plural = "채팅방 관리"
         verbose_name = "채팅방 관리"
