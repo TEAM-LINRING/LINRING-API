@@ -28,23 +28,6 @@ class RoomWritableSerializer(serializers.ModelSerializer):
         return super().validate(data)
 
 
-class RoomSerializer(serializers.ModelSerializer):
-    relation = UserDetailSerializer(read_only=True)
-    relation2 = UserDetailSerializer(read_only=True)
-    tagset = TagSetSerializer(read_only=True)
-    tagset2 = TagSetSerializer(read_only=True)
-    notice = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Room
-        fields = '__all__'
-
-    def get_notice(self, obj):
-        request = self.context.get("request")
-
-        return obj.message_room.filter(receiver=request.user, is_read=False).count()
-
-
 class MessageWritableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -58,3 +41,22 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = '__all__'
+
+
+class RoomSerializer(serializers.ModelSerializer):
+    relation = UserDetailSerializer(read_only=True)
+    relation2 = UserDetailSerializer(read_only=True)
+    tagset = TagSetSerializer(read_only=True)
+    tagset2 = TagSetSerializer(read_only=True)
+    notice = serializers.SerializerMethodField(read_only=True)
+    latest_message = MessageSerializer(read_only=True)
+
+    class Meta:
+        model = Room
+        fields = '__all__'
+
+    def get_notice(self, obj):
+        request = self.context.get("request")
+
+        return obj.message_room.filter(receiver=request.user, is_read=False).count()
+

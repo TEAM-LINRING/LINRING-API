@@ -19,7 +19,7 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-동봉되어있는 requirements.txt를 활용하여 의존성 패키지를 설치하여 줍니다.
+동봉되어있는 requirements.txt를 활용여 의존성 패키지를 설치하여 줍니다.
 
 ```bash
 pip install openapi
