@@ -2,9 +2,11 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from accounts.serializers import UserDetailSerializer, TagSetSerializer
+from accounts.serializers import UserDetailSerializer, TagSetSerializer, TagSetIsActiveSerializer
 from .models import Room, Message
 
+from datetime import datetime
+from django.utils import timezone
 
 class RoomWritableSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,13 +29,35 @@ class RoomWritableSerializer(serializers.ModelSerializer):
             raise ValidationError('같은 사용자와 태그로 채팅을 열 수 없습니다.')
         return super().validate(data)
 
+class RoomReservationTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ('tagset', 'tagset2', 'reservation_time')
+    
+    def validate(self, data):
+        if data['tagset'] == data['tagset2']:
+            raise ValidationError('같은 태그로 예약 시간을 설정할 수 없습니다.')
+        
+        if data['reservation_time'] < timezone.localtime():
+            raise ValidationError('지금보다 더 전으로 시간을 예약할 수 없습니다.')
 
+        room = self.Meta.model.objects.get(tagset=data["tagset"], tagset2=data["tagset2"])
+        tagset = room.tagset
+        tagset2 = room.tagset2
+        tagset.is_active = False
+        tagset2.is_active = False
+        tagset.save()
+        tagset2.save()
+        
+        return super().validate(data)
+    
 class RoomSerializer(serializers.ModelSerializer):
     relation = UserDetailSerializer(read_only=True)
     relation2 = UserDetailSerializer(read_only=True)
     tagset = TagSetSerializer(read_only=True)
     tagset2 = TagSetSerializer(read_only=True)
     notice = serializers.SerializerMethodField(read_only=True)
+    reservation_time = serializers.DateTimeField()
 
     class Meta:
         model = Room
