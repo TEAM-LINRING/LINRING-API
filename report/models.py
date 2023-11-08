@@ -10,12 +10,12 @@ REASON_CHOICES = (
 )
 
 class Report(TimeStampedModel):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="report_user", verbose_name="유저")
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name="report_user", verbose_name="유저", null=True)
     target = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="report_target",
                                verbose_name="신고 대상")
     reason = models.CharField(max_length=100, verbose_name="신고 사유", choices=REASON_CHOICES)
     description = models.CharField(max_length=100, verbose_name="신고 사유 입력", null=True, blank=True)
-
+ 
     def __str__(self):
         return self.user.email
 
