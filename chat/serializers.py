@@ -35,7 +35,7 @@ class RoomReservationTimeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['tagset'] == data['tagset2']:
             raise ValidationError('같은 태그로 예약 시간을 설정할 수 없습니다.')
-        
+
         if data['reservation_time'] < timezone.localtime():
             raise ValidationError('지금보다 더 전으로 시간을 예약할 수 없습니다.')
 
@@ -51,10 +51,10 @@ class RoomReservationTimeSerializer(serializers.ModelSerializer):
         tagset2.is_active = False
         tagset.save()
         tagset2.save()
-        self.send_create_message(room=room)
+        self.send_create_message(room=room, data=data)
     
-    def send_create_message(self, room):
-        message = Message(room=room, type=2, args=room.reservation_time, receiver=room.relation, sender=room.relation2, is_read=True)
+    def send_create_message(self, room, data):
+        message = Message(room=room, type=2, args=data['reservation_time'], receiver=room.relation, sender=room.relation2, is_read=True)
         message.save()
     
 class RoomSerializer(serializers.ModelSerializer):
