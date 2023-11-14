@@ -13,7 +13,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from utils.pagination import StandardResultsSetPagination
 from .models import Room, Message
-from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer, RoomReservationTimeSerializer
+from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer, \
+    RoomReservationTimeSerializer
 
 from django.conf import settings
 
@@ -64,6 +65,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=res_status, headers=headers)
 
+
 def convertValueString(data: dict):
     ret = {}
     for key in data.keys():
@@ -93,6 +95,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
+
+        return Response(data={'message': 'Update successful'}, status=200)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
