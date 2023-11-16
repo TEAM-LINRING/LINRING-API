@@ -266,7 +266,7 @@ AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET
 AWS_S3_BUCKET_NAME = S3_BUCKET
 AWS_REGION = 'ap-northeast-2'
 STATIC_URL = "https://static.gamept.gg/"
-MEDIA_URL = "https://static.gamept.gg/media"
+MEDIA_URL = "https://static.gamept.gg/media/"
 
 STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
 DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
