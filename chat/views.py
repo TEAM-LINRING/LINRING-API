@@ -96,7 +96,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
 
-        return Response(data={'message': 'Update successful'}, status=200)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
