@@ -131,7 +131,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -144,7 +144,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL_FRONT = "http://localhost:3000" #customize your project url
-URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
+# URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
+URL_FRONT = "http://3.106.229.77/"
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False
