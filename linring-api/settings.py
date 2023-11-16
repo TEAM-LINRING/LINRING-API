@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'u26w5j74+fgytu$e6$bem-u8o)yfc#jw5-i4o5rwfjlm1a$*4f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -264,3 +264,10 @@ AWS_DEFAULT_ACL = None
 CHAT_UNIQUE_ROOM = False
 
 # ACCOUNT_LOGOUT_ON_GET = True
+
+# AWS Setting
+AWS_REGION = 'ap-northeast-2'
+AWS_S3_BUCKET_NAME = AWS_STORAGE_BUCKET_NAME = 'linringbucket'  # 생성한 버킷 이름
+AWS_S3_BUCKET_NAME_STATIC = AWS_STORAGE_BUCKET_NAME
+AWS_ACCESS_KEY_ID = 'AKIAYO6U576ZTZOFUJMV'  # 액서스 키 ID
+AWS_SECRET_ACCESS_KEY = 'YlMwn58oaE/38ld8xxAp'
