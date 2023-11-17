@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'u26w5j74+fgytu$e6$bem-u8o)yfc#jw5-i4o5rwfjlm1a$*4f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -145,7 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL_FRONT = "http://localhost:3000" #customize your project url
 # URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
-URL_FRONT = "http://3.106.229.77"
+URL_FRONT = "https://linring.page.link/"
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False
@@ -257,16 +257,16 @@ CHAT_UNIQUE_ROOM = False
 # ACCOUNT_LOGOUT_ON_GET = True
 
 # AWS Setting
-AWS_ACCESS_KEY_ID = 'AKIAYO6U576ZTZOFUJMV'  # 액서스 키 ID
-AWS_SECRET_ACCESS_KEY = 'YlMwn58oaE/38ld8xxAp'
+AWS_ACCESS_KEY_ID = 'AKIA5QBICMUBDVTGZN7C'  # 액서스 키 ID
+AWS_SECRET_ACCESS_KEY = 'GAxxqh003smwAAiAHa1R3aE/RZxRw9ghad5Fnaz7'
 
 S3_BUCKET = "linringbucket"
 
 AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET
 AWS_S3_BUCKET_NAME = S3_BUCKET
 AWS_REGION = 'ap-northeast-2'
-STATIC_URL = "https://static.gamept.gg/"
-MEDIA_URL = "https://static.gamept.gg/media/"
+#STATIC_URL = "https://static.gamept.gg/"
+#MEDIA_URL = "https://static.gamept.gg/media"
 
 STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
 DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
