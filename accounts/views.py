@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
 from dj_rest_auth.views import UserDetailsView, sensitive_post_parameters_m, LogoutView
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password 
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from fcm_django.models import FCMDevice
@@ -20,10 +21,12 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework import generics, permissions
+from rest_framework.schemas import ManualSchema
+import coreapi
 
 from accounts.models import User, TagSet
 from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
-    EmailSerializer, RatingUpdateSerializer
+    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -80,7 +83,17 @@ class UserViewSet(ModelViewSet):
             return EmailSerializer
         if self.action in ['updateRating']:
             return RatingUpdateSerializer
+        if self.action in ['custom_destroy']:
+            return UserDeleteSerializer
         return self.serializer_class
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        password = request.data.get('password')
+        if check_password(password, instance.password):
+            instance.delete()
+            return Response({'messege': 'Deleted successfully'})
+        return Response({'messege': 'Invalid password'}, status=400)
 
     @action(detail=False, url_path="validation/nickname", methods=['post'], permission_classes=[permissions.AllowAny])
     def validationNickName(self, request, *args, **kwargs):
@@ -107,8 +120,7 @@ class UserViewSet(ModelViewSet):
             # If the nickname is available, return a success response
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
-
-
+        
 class RatingUpdateView(generics.UpdateAPIView):
     serializer_class = RatingUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]

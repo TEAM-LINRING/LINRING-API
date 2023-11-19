@@ -230,7 +230,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         exclude = ['is_staff', 'is_superuser']
 
-
 class NickNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
@@ -242,6 +241,10 @@ class EmailSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ('email',)
 
+class UserDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ('password',)
 
 class RatingUpdateSerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
