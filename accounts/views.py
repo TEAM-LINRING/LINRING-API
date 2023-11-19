@@ -21,9 +21,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework import generics, permissions
-from rest_framework import fields
 from rest_framework.schemas import ManualSchema
-from drf_yasg.utils import swagger_auto_schema
 import coreapi
 
 from accounts.models import User, TagSet
@@ -89,15 +87,15 @@ class UserViewSet(ModelViewSet):
             return UserDeleteSerializer
         return self.serializer_class
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        print(request)
-        password = request.data.get('password')
-        print(instance.password)
-        if check_password(password, instance.password):
-            instance.delete()
-            return Response({'messege': 'Deleted successfully'})
-        return Response({'messege': 'Invalid password'}, status=400)
+    # def destroy(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     print(request)
+    #     password = request.data.get('password')
+    #     print(instance.password)
+    #     if check_password(password, instance.password):
+    #         instance.delete()
+    #         return Response({'messege': 'Deleted successfully'})
+    #     return Response({'messege': 'Invalid password'}, status=400)
 
     @action(detail=False, methods=['post'], url_path="cumtom_destroy", schema=ManualSchema(fields=[
         coreapi.Field(name="password", required=True, location="query", schema={'type': 'string'})
@@ -138,6 +136,7 @@ class UserViewSet(ModelViewSet):
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
         
+
 class RatingUpdateView(generics.UpdateAPIView):
     serializer_class = RatingUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
