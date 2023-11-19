@@ -87,24 +87,9 @@ class UserViewSet(ModelViewSet):
             return UserDeleteSerializer
         return self.serializer_class
 
-    # def destroy(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     print(request)
-    #     password = request.data.get('password')
-    #     print(instance.password)
-    #     if check_password(password, instance.password):
-    #         instance.delete()
-    #         return Response({'messege': 'Deleted successfully'})
-    #     return Response({'messege': 'Invalid password'}, status=400)
-
-    @action(detail=False, methods=['post'], url_path="cumtom_destroy", schema=ManualSchema(fields=[
-        coreapi.Field(name="password", required=True, location="query", schema={'type': 'string'})
-    ]))
-    def custom_destroy(self, request, *args, **kwargs):
+    def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         password = request.data.get('password')
-        print(request)
-        print(password)
         if check_password(password, instance.password):
             instance.delete()
             return Response({'messege': 'Deleted successfully'})
@@ -136,7 +121,6 @@ class UserViewSet(ModelViewSet):
             response_data = {"message": "email is available"}
             return Response(response_data, status=status.HTTP_200_OK)
         
-
 class RatingUpdateView(generics.UpdateAPIView):
     serializer_class = RatingUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
