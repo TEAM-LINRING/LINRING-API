@@ -13,7 +13,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from utils.pagination import StandardResultsSetPagination
 from .models import Room, Message
-from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer
+from .serializers import RoomSerializer, MessageSerializer, MessageWritableSerializer, RoomWritableSerializer, \
+    RoomReservationTimeSerializer
 
 from django.conf import settings
 
@@ -35,6 +36,8 @@ class RoomViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ["create", "update"]:
             return RoomWritableSerializer
+        elif self.action in ["partial_update"]:
+            return RoomReservationTimeSerializer
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
@@ -79,7 +82,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     filterset_fields = ['room__id', 'room']
     ordering_fields = [field.name for field in Message._meta.fields]
     ordering = ('created',)
-    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         queryset = Message.objects.filter(Q(sender=self.request.user.id) | Q(receiver=self.request.user.id))
@@ -93,10 +95,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

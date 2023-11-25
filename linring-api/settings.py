@@ -109,9 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
@@ -134,12 +131,12 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -147,7 +144,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL_FRONT = "http://localhost:3000" #customize your project url
-URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
+# URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
+URL_FRONT = "https://linring.page.link/"
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False
@@ -157,7 +155,8 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-REGISTER_REDIRECT_URL = "/signup/complete"
+# REGISTER_REDIRECT_URL = "/signup/complete"
+REGISTER_REDIRECT_URL = "/gCjL"
 
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = URL_FRONT + REGISTER_REDIRECT_URL
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = URL_FRONT + REGISTER_REDIRECT_URL
@@ -252,18 +251,23 @@ FCM_DJANGO_SETTINGS = {
     # default: False
     "DELETE_INACTIVE_DEVICES": True,
 }
-# S3_BUCKET = "s3 bucket name"
-
-# AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET
-# AWS_S3_BUCKET_NAME = S3_BUCKET
-# AWS_REGION = 'ap-northeast-2'
-# STATIC_URL = "https://static.gamept.gg/"
-# MEDIA_URL = "https://static.gamept.gg/media"
-
-# STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
-# DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
 
 AWS_DEFAULT_ACL = None
 CHAT_UNIQUE_ROOM = False
 
 # ACCOUNT_LOGOUT_ON_GET = True
+
+# AWS Setting
+AWS_ACCESS_KEY_ID = 'AKIA5QBICMUBDVTGZN7C'  # 액서스 키 ID
+AWS_SECRET_ACCESS_KEY = 'GAxxqh003smwAAiAHa1R3aE/RZxRw9ghad5Fnaz7'
+
+S3_BUCKET = "linringbucket"
+
+AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET
+AWS_S3_BUCKET_NAME = S3_BUCKET
+AWS_REGION = 'ap-northeast-2'
+#STATIC_URL = "https://static.gamept.gg/"
+#MEDIA_URL = "https://static.gamept.gg/media"
+
+# STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
