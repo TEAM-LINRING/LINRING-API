@@ -145,7 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL_FRONT = "http://localhost:3000" #customize your project url
 # URL_FRONT = "http://127.0.0.1:8000"  # customize your project url
-URL_FRONT = "https://linring.page.link/"
+URL_FRONT = "https://linring.page.link"
 
 AUTH_USER_MODEL = 'accounts.User'
 ACCOUNT_USERNAME_REQUIRED = False
@@ -172,7 +172,7 @@ EMAIL_USE_SSL = False
 SERVER_EMAIL = 'no-aply@email.com'  # 커스텀 이메일 주소
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
-ACCOUNT_EMAIL_SUBJECT_PREFIX = '[커스텀 메일 prefix] '
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[링링] '
 
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'utils.pagination.StandardResultsSetPagination',
