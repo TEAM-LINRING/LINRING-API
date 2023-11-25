@@ -58,12 +58,28 @@ class RoomReservationTimeSerializer(serializers.ModelSerializer):
         message = Message(room=room, type=2, args=data['reservation_time'], receiver=room.relation, sender=room.relation2, is_read=True)
         message.save()
     
+
+class MessageWritableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = '__all__'
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender = UserDetailSerializer(read_only=True)
+    receiver = UserDetailSerializer(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = '__all__'
+        
 class RoomSerializer(serializers.ModelSerializer):
     relation = UserDetailSerializer(read_only=True)
     relation2 = UserDetailSerializer(read_only=True)
     tagset = TagSetSerializer(read_only=True)
     tagset2 = TagSetSerializer(read_only=True)
     notice = serializers.SerializerMethodField(read_only=True)
+    latest_message = MessageSerializer(read_only=True)
     reservation_time = serializers.DateTimeField()
 
     class Meta:
