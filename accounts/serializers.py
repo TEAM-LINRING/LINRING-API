@@ -1,7 +1,6 @@
 from allauth.account.adapter import get_adapter
 from allauth.utils import email_address_exists
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from decimal import Decimal
@@ -251,34 +250,6 @@ class RatingUpdateSerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
     rating = serializers.DecimalField(max_digits=5, decimal_places=2)
 
-
-class CumtomPasswordChangeSerializer(serializers.Serializer):
-    # user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
-    email = serializers.EmailField()
-    password1 = serializers.CharField(max_length=256)
-    password2 = serializers.CharField(max_length=256)
-
-    def create(self, validated_data):
-        # validated_data에서 새로운 비밀번호 추출
-        email = validated_data.get('email')
-        new_password1 = validated_data.get('password1')
-        new_password2 = validated_data.get('password2')
-
-        if get_user_model().objects.filter(email=email).exists() == False:
-            raise serializers.ValidationError("이메일이 존재하지 않음")
-
-        user = get_user_model().objects.get(email=email)
-        # 비밀번호 유효성 검증
-        if new_password1 != new_password2:
-            raise serializers.ValidationError("Passwords do not match.")
-        
-        # 사용자의 비밀번호 변경
-        form = SetPasswordForm(user, {'new_password1': new_password1, 'new_password2': new_password2})
-        if form.is_valid():
-            form.save()
-            return user
-        else:
-            raise serializers.ValidationError(form.errors)
 
 class ResetPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(max_length=256)

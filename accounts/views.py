@@ -26,7 +26,7 @@ import coreapi
 
 from accounts.models import User, TagSet
 from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
-    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer, CumtomPasswordChangeSerializer
+    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -47,20 +47,10 @@ class PasswordChangeView(GenericAPIView):
     Accepts the following POST parameters: new_password1, new_password2
     Returns the success/fail message.
     """
-    serializer_class = CumtomPasswordChangeSerializer
-    permission_classes = (AllowAny,)
+    serializer_class = api_settings.PASSWORD_CHANGE_SERIALIZER
+    permission_classes = (IsAuthenticated,)
     throttle_scope = 'dj_rest_auth'
-    queryset = User.objects.all()
-
-    @sensitive_post_parameters_m
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'detail': ('비밀번호 변경 완료.')})
+    authentication_classes = [JWTAuthentication]
 
 
 class UserFilter(django_filters.FilterSet):
