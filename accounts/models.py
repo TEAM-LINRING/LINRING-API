@@ -170,6 +170,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
                                          blank=True)
     birth = models.IntegerField(null=True)
     rating = models.DecimalField(max_digits=100, default=0, decimal_places=2, verbose_name="평점", null=True, blank=True)
+    block_user = models.JSONField(verbose_name="유저차단", null=True, blank=True)
     is_active = models.BooleanField(verbose_name="활성화 여부", default=True)
     is_staff = models.BooleanField(verbose_name="스태프 여부", default=False)
     is_superuser = models.BooleanField(verbose_name="최고 관리자 여부", default=False)
