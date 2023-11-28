@@ -106,7 +106,10 @@ class UserViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = UserSerializer(instance=instance)
-        block_user = json.loads(serializer.data['block_user'].replace("\'", "\""))
+        try:
+            block_user = json.loads(serializer.data['block_user'].replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
         serializer_data = serializer.data
         serializer_data['block_user'] = block_user['user']
         return Response(serializer_data)
@@ -250,7 +253,6 @@ class UserSearch(APIView):
             block_user = json.loads(user.block_user.replace("\'", "\""))
         except:
             block_user = {"user":[]}
-        print(block_user["user"])
         users = User.objects.exclude(Q(id=user.id) | Q(id__in=block_user["user"]))
         print(users)
         self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False).exclude(owner__in=block_user["user"])
