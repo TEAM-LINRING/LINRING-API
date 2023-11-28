@@ -187,7 +187,7 @@ class TagSetViewSet(ModelViewSet):
 
 class BlockUserUpdateView(generics.UpdateAPIView):
     serializer_class = BlockUserSerializer
-    permission_classes = [AllowAny,]
+    permission_classes = [IsAuthenticated,]
 
     def get_queryset(self):
         return get_user_model().objects.all()
