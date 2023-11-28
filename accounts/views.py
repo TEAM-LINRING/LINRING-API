@@ -5,10 +5,11 @@ from decimal import Decimal, getcontext
 from dj_rest_auth.app_settings import api_settings
 from django.shortcuts import get_object_or_404
 from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
-from dj_rest_auth.views import UserDetailsView, sensitive_post_parameters_m, LogoutView
+from dj_rest_auth.views import UserDetailsView, sensitive_post_parameters_m, LogoutView, LoginView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password 
 from django.utils import timezone
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from fcm_django.models import FCMDevice
 from rest_framework import status, filters
@@ -38,6 +39,13 @@ from utils.pagination import StandardResultsSetPagination
 class UserDetailsViewOverride(UserDetailsView):
     authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
 
+class UserLoginViewOverride(LoginView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        response_data = response
+        block_user = json.loads(response.data['user']['block_user'].replace("\'", "\""))
+        response_data.data['user']['block_user'] = block_user['user']
+        return response_data
 
 class UserLogoutViewOverride(LogoutView):
     def logout(self, request):

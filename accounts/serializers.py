@@ -324,11 +324,16 @@ class BlockUserSerializer(serializers.Serializer):
         except:
             block_user = {"user":[]}
 
+        try:
+            get_user = User.objects.get(id=block_user_id)
+        except:
+            get_user = -1
+            
         if block_user_id in block_user['user']:
             raise serializers.ValidationError("이미 차단한 유저입니다.")
 
-        if User.objects.get(id=block_user_id) not in users:
+        if get_user not in users:
             raise serializers.ValidationError("존재하지 않는 유저입니다.")
         
-        if User.objects.get(id=block_user_id) == user:
+        if get_user == user:
             raise serializers.ValidationError("자신을 차단할 수 없습니다.")

@@ -22,7 +22,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from .views import RatingUpdateView
 
 from accounts.views import UserDetailsViewOverride, UserViewSet, get_refresh_view, \
-    UserLogoutViewOverride, TagSetViewSet, UserSearch, BlockUserUpdateView
+    UserLogoutViewOverride, TagSetViewSet, UserSearch, BlockUserUpdateView, UserLoginViewOverride
 
 router = routers.DefaultRouter()
 router.register(r'tagset', TagSetViewSet)
@@ -31,6 +31,7 @@ urlpatterns = [
     path('token/refresh/', get_refresh_view().as_view()),
     path('rating/update/', RatingUpdateView.as_view(), name='update_rating'),
     path('blockuser/update/', BlockUserUpdateView.as_view(), name='update_block_user'),
+    path('login/', UserLoginViewOverride.as_view(), name='login'),
     path('', include('dj_rest_auth.urls')),
     re_path(r'^register/account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
             name='account_confirm_email'),
