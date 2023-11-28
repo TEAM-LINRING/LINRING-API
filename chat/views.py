@@ -1,6 +1,7 @@
 import json
-
 import firebase_admin
+
+from collections import OrderedDict
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from fcm_django.models import FCMDevice
@@ -70,7 +71,19 @@ class RoomViewSet(viewsets.ModelViewSet):
         # queryset.filter(receiver=self.request.user.id)
         # queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer_data = serializer.data
+        for index, data in enumerate(serializer.data):
+            try:
+                relation1 = json.loads(data['relation']['block_user'].replace("\'", "\""))
+            except:
+                relation1 = {"user":[]}
+            try:
+                relation2 = json.loads(data['relation2']['block_user'].replace("\'", "\""))
+            except:
+                relation2 = {"user":[]}
+            serializer_data[index]['relation']['block_user'] = relation1['user']
+            serializer_data[index]['relation2']['block_user'] = relation2['user']
+        return Response(serializer_data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
