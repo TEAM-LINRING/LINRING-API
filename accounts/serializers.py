@@ -308,3 +308,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
+class BlockUserSerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    block_user = serializers.IntegerField()

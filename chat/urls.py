@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 
-from accounts.views import UserDetailsViewOverride, PasswordChangeView
+from accounts.views import UserDetailsViewOverride
 from .views import RoomViewSet, MessageViewSet
 
 # from gamept.views import RequestViewSet

@@ -21,8 +21,8 @@ from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import RatingUpdateView
 
-from accounts.views import UserDetailsViewOverride, PasswordChangeView, UserViewSet, get_refresh_view, \
-    UserLogoutViewOverride, TagSetViewSet, UserSearch
+from accounts.views import UserDetailsViewOverride, UserViewSet, get_refresh_view, \
+    UserLogoutViewOverride, TagSetViewSet, UserSearch, BlockUserUpdateView
 
 router = routers.DefaultRouter()
 router.register(r'tagset', TagSetViewSet)
@@ -30,6 +30,7 @@ router.register(r'user', UserViewSet)
 urlpatterns = [
     path('token/refresh/', get_refresh_view().as_view()),
     path('rating/update/', RatingUpdateView.as_view(), name='update_rating'),
+    path('blockuser/update/', BlockUserUpdateView.as_view(), name='update_block_user'),
     path('', include('dj_rest_auth.urls')),
     re_path(r'^register/account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
             name='account_confirm_email'),
@@ -41,7 +42,6 @@ urlpatterns = [
         path('', include(router.urls)),
         path('user/me/', UserDetailsViewOverride.as_view(), name='rest_user_details'),
         path('user/detail/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'})),
-        path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
         path('logout/', UserLogoutViewOverride.as_view(), name='rest_logout'),
         path('user-search/<int:id>', UserSearch.as_view(), name='rest_user_search')
     ]))

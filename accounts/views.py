@@ -22,11 +22,16 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework import generics, permissions
 from rest_framework.schemas import ManualSchema
-import coreapi
+import json
+
+from dj_rest_auth.views import PasswordResetConfirmView
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+
 
 from accounts.models import User, TagSet
 from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
-    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer
+    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer, BlockUserSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -40,18 +45,25 @@ class UserLogoutViewOverride(LogoutView):
         return super().logout(request)
 
 
-class PasswordChangeView(GenericAPIView):
-    """
-    Calls Django Auth SetPasswordForm save method.
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'password_reset_key_message.html'
 
-    Accepts the following POST parameters: new_password1, new_password2
-    Returns the success/fail message.
-    """
-    serializer_class = api_settings.PASSWORD_CHANGE_SERIALIZER
-    permission_classes = (IsAuthenticated,)
-    throttle_scope = 'dj_rest_auth'
-    authentication_classes = [JWTAuthentication]
+    def get(self, request, *args, **kwargs):
+        # 사용자 ID와 토큰을 딥링크에서 추출
+        uidb64 = kwargs.get('uidb64')
+        token = kwargs.get('token')
+        print("Debug")
+        # 사용자 ID를 디코딩
+        uid = force_str(urlsafe_base64_decode(uidb64))
 
+        # 추가로 필요한 로직 수행
+        context = {
+            'user_id' : uid,
+            'token' : token,
+        }
+
+        # 부모 클래스의 get 메서드 호출
+        return super().get(request, *args, **kwargs)
 
 class UserFilter(django_filters.FilterSet):
     class Meta:
@@ -180,6 +192,36 @@ class TagSetViewSet(ModelViewSet):
         else:
             return TagSet.objects.none()
 
+class BlockUserUpdateView(generics.UpdateAPIView):
+    serializer_class = BlockUserSerializer
+    permission_classes = [AllowAny,]
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
+
+    def get_object(self):
+        user_id = self.request.data.get('user', '')
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=user_id)
+        return obj
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        block_user_id = request.data.get('block_user', '')
+        try:
+            block_user = json.loads(user.block_user.replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
+        block_user["user"].append(int(block_user_id))
+        user.block_user = json.dumps(block_user)
+        user.save()
+        response_data = {
+            'user': user.id,
+            'block_user': user.block_user,
+        }
+        return Response(response_data)
+
+        
 
 class UserSearch(APIView):
     def __init__(self):
@@ -189,8 +231,14 @@ class UserSearch(APIView):
     def get(self, request, id):
         user = request.user
         user_tag = user.tagset_user.get(id=id)
-        users = User.objects.exclude(id=user.id)
-        self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False)
+        try:
+            block_user = json.loads(user.block_user.replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
+        print(block_user["user"])
+        users = User.objects.exclude(Q(id=user.id) | Q(id__in=block_user["user"]))
+        print(users)
+        self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False).exclude(owner__in=block_user["user"])
 
         if len(self.tags) < 4:
             seriallizer = TagSetSerializer(self.tags, many=True)
