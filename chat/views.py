@@ -75,14 +75,23 @@ class RoomViewSet(viewsets.ModelViewSet):
         for index, data in enumerate(serializer.data):
             try:
                 relation1 = json.loads(data['relation']['block_user'].replace("\'", "\""))
+                last_msg_sender = json.loads(data['lastest_message']['sender']['block_user']).replace("\'", "\"")
             except:
                 relation1 = {"user":[]}
+                last_msg_sender = {"user":[]}
             try:
                 relation2 = json.loads(data['relation2']['block_user'].replace("\'", "\""))
+                last_msg_receiver = json.loads(data['lastest_message']['receiver']['block_user']).replace("\'", "\"")
             except:
                 relation2 = {"user":[]}
+                last_msg_receiver = {"user":[]}
             serializer_data[index]['relation']['block_user'] = relation1['user']
             serializer_data[index]['relation2']['block_user'] = relation2['user']
+            try:
+                serializer_data[index]['latest_message']['sender']['block_user'] = last_msg_sender['user']
+                serializer_data[index]['latest_message']['receiver']['block_user'] = last_msg_receiver['user']
+            except:
+                serializer_data[index]['latest_message'] = None
         return Response(serializer_data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -92,14 +101,24 @@ class RoomViewSet(viewsets.ModelViewSet):
         serializer_data = serializer.data
         try:
             relation1 = json.loads(serializer.data['relation']['block_user'].replace("\'", "\""))
+            last_msg_sender = json.loads(serializer.data['latest_message']['sender']['block_user']).replace("\'", "\"")
         except:
             relation1 = {"user":[]}
+            last_msg_sender = {"user":[]}
         try:
             relation2 = json.loads(serializer.data['relation2']['block_user'].replace("\'", "\""))
+            last_msg_receiver = json.loads(serializer.data['latest_message']['receiver']['block_user']).replace("\'", "\"")
         except:
             relation2 = {"user":[]}
+            last_msg_receiver = {"user":[]}
+        print(last_msg_sender)
         serializer_data['relation']['block_user'] = relation1['user']
         serializer_data['relation2']['block_user'] = relation2['user']
+        try:
+            serializer_data['latest_message']['sender']['block_user'] = last_msg_sender['user']
+            serializer_data['latest_message']['receiver']['block_user'] = last_msg_receiver['user']
+        except:
+            serializer_data['latest_message'] = None
         return Response(serializer_data)
 
 def convertValueString(data: dict):
