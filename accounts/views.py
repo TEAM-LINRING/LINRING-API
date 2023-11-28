@@ -43,7 +43,10 @@ class UserLoginViewOverride(LoginView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         response_data = response
-        block_user = json.loads(response.data['user']['block_user'].replace("\'", "\""))
+        try:
+            block_user = json.loads(response.data['user']['block_user'].replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
         response_data.data['user']['block_user'] = block_user['user']
         return response_data
 
