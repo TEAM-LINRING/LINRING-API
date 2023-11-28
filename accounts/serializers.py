@@ -13,6 +13,8 @@ from accounts.models import User
 from accounts.models import TagSet
 from accounts.models import Significant
 from accounts.models import Profile
+import json
+
 
 COLLEGE_CHOICES = (
     ("글로벌인문지역대학", "글로벌인문지역대학"),
@@ -312,3 +314,21 @@ class ProfileSerializer(serializers.ModelSerializer):
 class BlockUserSerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
     block_user = serializers.IntegerField()
+
+    def validate(self, data):
+        user = data.get('user')
+        block_user_id = int(data.get('block_user'))
+        users = User.objects.all()
+        try:
+            block_user = json.loads(user.block_user.replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
+
+        if block_user_id in block_user['user']:
+            raise serializers.ValidationError("이미 차단한 유저입니다.")
+
+        if User.objects.get(id=block_user_id) not in users:
+            raise serializers.ValidationError("존재하지 않는 유저입니다.")
+        
+        if User.objects.get(id=block_user_id) == user:
+            raise serializers.ValidationError("자신을 차단할 수 없습니다.")

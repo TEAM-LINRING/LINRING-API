@@ -45,25 +45,18 @@ class UserLogoutViewOverride(LogoutView):
         return super().logout(request)
 
 
-class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    template_name = 'password_reset_key_message.html'
+class PasswordChangeView(GenericAPIView):
+    """
+    Calls Django Auth SetPasswordForm save method.
 
-    def get(self, request, *args, **kwargs):
-        # 사용자 ID와 토큰을 딥링크에서 추출
-        uidb64 = kwargs.get('uidb64')
-        token = kwargs.get('token')
-        print("Debug")
-        # 사용자 ID를 디코딩
-        uid = force_str(urlsafe_base64_decode(uidb64))
+    Accepts the following POST parameters: new_password1, new_password2
+    Returns the success/fail message.
+    """
+    serializer_class = api_settings.PASSWORD_CHANGE_SERIALIZER
+    permission_classes = (IsAuthenticated,)
+    throttle_scope = 'dj_rest_auth'
+    authentication_classes = [JWTAuthentication]
 
-        # 추가로 필요한 로직 수행
-        context = {
-            'user_id' : uid,
-            'token' : token,
-        }
-
-        # 부모 클래스의 get 메서드 호출
-        return super().get(request, *args, **kwargs)
 
 class UserFilter(django_filters.FilterSet):
     class Meta:
@@ -212,6 +205,9 @@ class BlockUserUpdateView(generics.UpdateAPIView):
             block_user = json.loads(user.block_user.replace("\'", "\""))
         except:
             block_user = {"user":[]}
+        serializer_instance = BlockUserSerializer(data={'user':user, 'block_user':block_user_id})
+        is_valid = serializer_instance.is_valid()
+        serializer_instance.validate(serializer_instance.data)
         block_user["user"].append(int(block_user_id))
         user.block_user = json.dumps(block_user)
         user.save()
