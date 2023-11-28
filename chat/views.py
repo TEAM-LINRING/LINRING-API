@@ -67,15 +67,13 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
-
+        # queryset.filter(receiver=self.request.user.id)
+        # queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_read = True
-        print(instance)
         instance.save()
         serializer = self.get_serializer(instance)
         serializer_data = serializer.data
