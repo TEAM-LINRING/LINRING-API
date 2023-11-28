@@ -65,6 +65,25 @@ class RoomViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=res_status, headers=headers)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_read = True
+        print(instance)
+        instance.save()
+        serializer = self.get_serializer(instance)
+        serializer_data = serializer.data
+        relation1 = json.loads(serializer.data['relation']['block_user'].replace("\'", "\""))
+        relation2 = json.loads(serializer.data['relation2']['block_user'].replace("\'", "\""))
+        serializer_data['relation']['block_user'] = relation1['user']
+        serializer_data['relation2']['block_user'] = relation2['user']
+        return Response(serializer_data)
 
 def convertValueString(data: dict):
     ret = {}
