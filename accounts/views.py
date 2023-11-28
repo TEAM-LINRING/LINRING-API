@@ -80,7 +80,7 @@ class UserViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = get_user_model().objects
         return queryset
-
+    
     def get_serializer_class(self):
         if self.action in ['validationNickName']:
             return NickNameSerializer
@@ -213,7 +213,7 @@ class BlockUserUpdateView(generics.UpdateAPIView):
         user.save()
         response_data = {
             'user': user.id,
-            'block_user': user.block_user,
+            'block_user': block_user["user"],
         }
         return Response(response_data)
 
