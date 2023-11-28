@@ -91,6 +91,14 @@ class UserViewSet(ModelViewSet):
         if self.action in ['custom_destroy']:
             return UserDeleteSerializer
         return self.serializer_class
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = UserSerializer(instance=instance)
+        block_user = json.loads(serializer.data['block_user'].replace("\'", "\""))
+        serializer_data = serializer.data
+        serializer_data['block_user'] = block_user['user']
+        return Response(serializer_data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
