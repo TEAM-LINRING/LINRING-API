@@ -79,8 +79,14 @@ class RoomViewSet(viewsets.ModelViewSet):
         instance.save()
         serializer = self.get_serializer(instance)
         serializer_data = serializer.data
-        relation1 = json.loads(serializer.data['relation']['block_user'].replace("\'", "\""))
-        relation2 = json.loads(serializer.data['relation2']['block_user'].replace("\'", "\""))
+        try:
+            relation1 = json.loads(serializer.data['relation']['block_user'].replace("\'", "\""))
+        except:
+            relation1 = {"user":[]}
+        try:
+            relation2 = json.loads(serializer.data['relation2']['block_user'].replace("\'", "\""))
+        except:
+            relation2 = {"user":[]}
         serializer_data['relation']['block_user'] = relation1['user']
         serializer_data['relation2']['block_user'] = relation2['user']
         return Response(serializer_data)
