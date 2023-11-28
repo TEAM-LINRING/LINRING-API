@@ -131,15 +131,39 @@ class MessageViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         queryset.filter(receiver=self.request.user.id, is_read=False).update(is_read=True)
-
+    
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer_data = serializer.data
+        for index, data in enumerate(serializer.data):
+            try:
+                sender = json.loads(data['sender']['block_user'].replace("\'", "\""))
+            except:
+                sender = {"user":[]}
+            try:
+                receiver = json.loads(data['receiver']['block_user'].replace("\'", "\""))
+            except:
+                receiver = {"user":[]}
+            serializer_data[index]['sender']['block_user'] = sender['user']
+            serializer_data[index]['receiver']['block_user'] = receiver['user']
+        return Response(serializer_data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.is_read = True
         instance.save()
         serializer = self.get_serializer(instance)
+        serializer_data = serializer.data
+        print(serializer_data)
+        try:
+            sender = json.loads(serializer.data['sender']['block_user'].replace("\'", "\""))
+        except:
+            sender = {"user":[]}
+        try:
+            receiver = json.loads(serializer.data['receiver']['block_user'].replace("\'", "\""))
+        except:
+            receiver = {"user":[]}
+        serializer_data['sender']['block_user'] = sender['user']
+        serializer_data['receiver']['block_user'] = receiver['user']
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
