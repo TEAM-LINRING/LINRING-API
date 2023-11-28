@@ -22,11 +22,16 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework import generics, permissions
 from rest_framework.schemas import ManualSchema
-import coreapi
+import json
+
+from dj_rest_auth.views import PasswordResetConfirmView
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+
 
 from accounts.models import User, TagSet
 from accounts.serializers import NewCookieTokenRefreshSerializer, UserSerializer, TagSetSerializer, NickNameSerializer, \
-    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer
+    EmailSerializer, RatingUpdateSerializer, UserDeleteSerializer, BlockUserSerializer
 from utils.pagination import StandardResultsSetPagination
 
 
@@ -180,6 +185,39 @@ class TagSetViewSet(ModelViewSet):
         else:
             return TagSet.objects.none()
 
+class BlockUserUpdateView(generics.UpdateAPIView):
+    serializer_class = BlockUserSerializer
+    permission_classes = [AllowAny,]
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
+
+    def get_object(self):
+        user_id = self.request.data.get('user', '')
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=user_id)
+        return obj
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        block_user_id = request.data.get('block_user', '')
+        try:
+            block_user = json.loads(user.block_user.replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
+        serializer_instance = BlockUserSerializer(data={'user':user, 'block_user':block_user_id})
+        is_valid = serializer_instance.is_valid()
+        serializer_instance.validate(serializer_instance.data)
+        block_user["user"].append(int(block_user_id))
+        user.block_user = json.dumps(block_user)
+        user.save()
+        response_data = {
+            'user': user.id,
+            'block_user': user.block_user,
+        }
+        return Response(response_data)
+
+        
 
 class UserSearch(APIView):
     def __init__(self):
@@ -189,8 +227,14 @@ class UserSearch(APIView):
     def get(self, request, id):
         user = request.user
         user_tag = user.tagset_user.get(id=id)
-        users = User.objects.exclude(id=user.id)
-        self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False)
+        try:
+            block_user = json.loads(user.block_user.replace("\'", "\""))
+        except:
+            block_user = {"user":[]}
+        print(block_user["user"])
+        users = User.objects.exclude(Q(id=user.id) | Q(id__in=block_user["user"]))
+        print(users)
+        self.tags = TagSet.objects.exclude(owner=user.id).exclude(is_active=False).exclude(owner__in=block_user["user"])
 
         if len(self.tags) < 4:
             seriallizer = TagSetSerializer(self.tags, many=True)
